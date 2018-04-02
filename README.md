@@ -1,2 +1,2 @@
-# acai
-Açai Programming Language
+# Açai
+The Açai Programming Language
