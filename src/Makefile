@@ -1,9 +1,9 @@
 CC=clang
 
-compiler:
+compiler: main.c
 	$(CC) -o compiler main.c llvm/init.c -I/usr/include/llvm-5.0 -I/usr/include/llvm-c-5.0 -L/usr/lib/llvm-5.0/lib -lLLVM
 
-repl:
+repl: main.c
 	$(CC) -o repl main.c llvm/init.c -I/usr/include/llvm-5.0 -I/usr/include/llvm-c-5.0 -L/usr/lib/llvm-5.0/lib -lLLVM
 
 clean:
