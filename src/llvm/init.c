@@ -3,7 +3,6 @@
 #include "acai.h"
 #include "value.h"
 #include "../util.h"
-#include "../builtin/builtin.h"
 
 void llvm_create_module(char *name, llvm_ctx *ctx) {
 
@@ -22,8 +21,6 @@ void llvm_init(llvm_ctx *ctx) {
 	ctx->ctx = LLVMGetGlobalContext();
 
 	llvm_value_init(ctx);
-
-	acai_init(ctx);
 }
 
 void llvm_create_main(llvm_ctx *ctx) {
@@ -38,7 +35,6 @@ void llvm_create_main(llvm_ctx *ctx) {
 
 	LLVMBasicBlockRef bblock = LLVMAppendBasicBlockInContext(ctx->ctx, func, "entrypoint");
 	LLVMPositionBuilderAtEnd(ctx->builder, bblock);
-
 }
 
 void llvm_finish(llvm_ctx *ctx) {

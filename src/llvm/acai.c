@@ -11,8 +11,8 @@ void acai_init(llvm_ctx *ctx) {
 
 	LLVMTypeRef params[3];
 	params[0] = LLVMPointerType(LLVMInt8Type(), 0); //name
-	params[1] = LLVMInt64Type();
-	params[2] = LLVMArrayType(LLVMPointerType(llvm_value_type(), 0), 0);
+	params[1] = LLVMInt64Type(); //argc
+	params[2] = LLVMArrayType(LLVMPointerType(llvm_value_type(), 0), 0); //argv
 
 	LLVMTypeRef func_spec = LLVMFunctionType(LLVMPointerType(LLVMInt8Type(), 0), params, 3, FALSE);
 

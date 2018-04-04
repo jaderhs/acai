@@ -1,12 +1,14 @@
-#include "../util.h"
-#include "../llvm/ctx.h"
+#include <stdlib.h>
 
-#define REGISTER_BUILTIN(name) builtin_register_func(ctx, name)
+void *builtin_print(int argc, acai_type *argv[]);
 
-struct _builtin_func {
-	char *name;
-	void *func;
-	struct _builtin_func *next;
+acai_module_func builtin_funcs[] = {
+	{"print", builtin_print, NULL},
+	{NULL, NULL, NULL}
 };
 
-void builtin_register_func(llvm_ctx *ctx, char *name);
+acai_module acai_module_builtin = {
+	"builtin",
+	~0,
+	builtin_funcs
+};

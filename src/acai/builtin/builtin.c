@@ -1,34 +1,12 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
-#include "builtin_registry.h"
+#include "../module.h"
 #include <llvm-c/Core.h>
+#include "builtin.h"
 
-void builtin_register(llvm_ctx *ctx) {
+void *builtin_print(int argc, acai_type *argv[]) {
 
-	REGISTER_BUILTIN("print");
-}
-
-struct _builtin_func *_builtin = NULL;
-
-void builtin_register_func(char *name, acai_func func) {
-
-	struct _builtin_func *b = malloc(sizeof(struct _builtin_func));
-
-	b->name = strdup(name);
-	b->func = func;
-
-	b->next = _builtin;
-	_builtin = b;
-}
-
-LLVMValueRef get_builtin(char *identifier) {
-
-	struct _builtin_func *p;
-	for(p = _builtin; p != NULL; p = p->next) {
-
-		if(strcmp(p->name, identifier) == 0)
-			return p->func;
-	}
-
+	printf("builtin.print(%d)\n", argc);
 	return NULL;
 }

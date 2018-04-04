@@ -1,12 +1,12 @@
 #include <stdlib.h>
 #include <malloc.h>
+#include <string.h>
 #include "ctx.h"
 #include "acai.h"
 #include "value.h"
 #include "../util.h"
 #include "../parser/ast.h"
 #include "../parser/parser.h"
-#include "../builtin/builtin.h"
 
 LLVMValueRef llvm_argument(llvm_ctx *ctx, tree *node) {
 
@@ -24,6 +24,7 @@ LLVMValueRef llvm_argument(llvm_ctx *ctx, tree *node) {
 void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 	int i;
+	char *str;
 	tree *right;
 	struct ast_list *l;
 	LLVMValueRef func;
@@ -64,17 +65,26 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 		i = 0;
 		if(func == NULL) {
+			str = malloc(16 + strlen(node->v.s));
+			sprintf(str, "func-name-%s", node->v.s);
+
 			func = acai_get_func_call();
-			args[i] = LLVMBuildGlobalStringPtr(ctx->builder, node->v.s, "func-name");
+			args[i] = LLVMBuildGlobalStringPtr(ctx->builder, node->v.s, str);
 			i++;
 		}
+
+		str = malloc(24 + strlen(node->v.s));
+		sprintf(str, "func-call-%s-args", node->v.s);
 
 		args[i] = LLVMConstInt(LLVMInt64Type(), argc, FALSE);
 		args[++i] = LLVMBuildArrayAlloca(ctx->builder,
 						LLVMArrayType(LLVMPointerType(llvm_value_type(), 0), argc),
 						LLVMConstArray(LLVMPointerType(llvm_value_type(), 0), argv, argc),
-						"args");
+						str);
 
-		LLVMBuildCall(ctx->builder, func, args, 2, node->v.s);
+		str = malloc(16 + strlen(node->v.s));
+		sprintf(str, "func-call-%s", node->v.s);
+
+		LLVMBuildCall(ctx->builder, func, args, i+1, str);
 	}
 }
