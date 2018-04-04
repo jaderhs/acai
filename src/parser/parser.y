@@ -1,7 +1,7 @@
 %error-verbose
 %{
   #include <stdio.h>
-  #include "ast.h"
+  #include "eval.h"
   int yylex (void);
 
 /* Called by yyparse on error.  */
@@ -28,12 +28,17 @@ yyerror (char const *s)
 %token <i> TOK_TYPENAME
 %token <s> TOK_IDENTIFIER
 
+%token TOK_OP_ASSIGNDECLARE
+%token OP_UNARY OP_BINARY
+
+%token DECL_VAR FUNC_CALL
 %token KEYWORD_IMPORT KEYWORD_AS
-%token LIST_STATEMENT LIST_IDENTIFIER
+%token LIST_STATEMENT LIST_IDENTIFIER LIST_EXPRESSION
 
 %type <t> content import statement statement_spec simple_statement
-%type <t> declaration_variable typed_identifier_list type identifier identifier_list
-%type <t> expression unary_expression primary_expression operand literal
+%type <t> declaration_variable declaration_variable_value
+%type <t> typed_identifier_list type identifier identifier_list
+%type <t> expression expression_list unary_expression primary_expression operand literal
 %type <t> literal_float literal_integer literal_string
 
 
@@ -41,7 +46,7 @@ yyerror (char const *s)
 
 prog:
 	%empty
-|	prog content		{}
+|	prog content	{ eval($2); tree_free($2); }
 ;
 
 content:
@@ -70,6 +75,12 @@ simple_statement:
 
 declaration_variable:
 	typed_identifier_list
+|	declaration_variable_value
+;
+
+declaration_variable_value:
+	typed_identifier_list '=' expression_list				{ $$ = tree_new_with_children(DECL_VAR, tree_op_new(OP_BINARY, '=', TRUE, $1, $3), NULL); }
+|	identifier_list TOK_OP_ASSIGNDECLARE expression_list	{ $$ = tree_new_with_children(DECL_VAR, tree_op_new(OP_BINARY, TOK_OP_ASSIGNDECLARE, TRUE, $1, $3), NULL); }
 ;
 
 typed_identifier_list:
@@ -89,6 +100,11 @@ identifier:
 	TOK_IDENTIFIER	{ $$ = tree_new(TOK_IDENTIFIER); $$->v.s = $1; }
 ;
 
+expression_list:
+	expression						{ $$ = tree_list_new(LIST_EXPRESSION, $1); }
+|	expression_list ',' expression	{ $$ = tree_list_prepend($1, $3); }
+;
+
 expression:
 	unary_expression
 ;
@@ -99,6 +115,8 @@ unary_expression:
 
 primary_expression:
 	operand
+|	primary_expression '(' ')'					{ $$ = tree_new_with_children(FUNC_CALL, $1, NULL); }
+|	primary_expression '(' expression_list ')'	{ $$ = tree_new_with_children(FUNC_CALL, $1, $3); }
 ;
 
 operand:

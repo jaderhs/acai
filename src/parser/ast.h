@@ -22,6 +22,12 @@ struct ast_vtype {
 	void *content; // a tree
 };
 
+struct ast_op {
+	int op;
+	int is_assignment;
+	void *child[2]; // tree
+};
+
 typedef struct ast_tree {
 
 	int type;
@@ -33,6 +39,7 @@ typedef struct ast_tree {
 		struct ast_list *list;
 		struct ast_tree *child[2];
 		struct ast_vtype vt;
+		struct ast_op op;
 	} v;
 
 } tree;
@@ -47,3 +54,6 @@ tree *tree_list_prepend(tree *parent, tree *child);
 void tree_list_free(tree *parent);
 
 tree *tree_variable_type_new(int type, int is_array);
+
+tree *tree_op_new(int type, int op, int is_assignment, tree *left, tree *right);
+void tree_op_free(tree *parent);
