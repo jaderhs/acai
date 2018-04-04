@@ -1,4 +1,8 @@
 %option noyywrap yylineno
+%{
+#include "ast.h"
+#include "parser.h"
+%}
 
 DIGIT			[0-9]
 IDENTIFIER		[[:alpha:]_][[:alnum:]_]*
