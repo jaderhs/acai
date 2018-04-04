@@ -1,4 +1,4 @@
-OBJECTS = parser.o lex.o ast.o
+OBJECTS = parser.o lex.o ast.o eval.o
 
 all: lexer $(OBJECTS)
 	ar rcs parser.a $(OBJECTS)
