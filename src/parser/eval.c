@@ -1,15 +1,30 @@
 #include <stdio.h>
 #include "eval.h"
 #include "parser.h"
+#include "../llvm/llvm.h"
 
-void eval(tree *node) {
+tree *eval(llvm_ctx *ctx, tree *node) {
+
+	tree *p;
+	struct ast_list *l;
 
 	switch(node->type) {
+
+		case LIST_STATEMENT:
+		case LIST_EXPRESSION:
+
+			AST_LIST_FOREACH(node, l) {
+
+				eval(ctx, l->node);
+			}
+
+			break;
 
 		case DECL_VAR:
 			break;
 
 		case FUNC_CALL:
+			llvm_function_call(ctx, node);
 			break;
 
 		default:
@@ -17,4 +32,5 @@ void eval(tree *node) {
 			break;
 	}
 
+	return node;
 }

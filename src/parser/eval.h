@@ -1,3 +1,4 @@
 #include "ast.h"
+#include "../llvm/ctx.h"
 
-void eval(tree *node);
+tree *eval(llvm_ctx *ctx, tree *node);

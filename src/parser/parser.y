@@ -1,14 +1,16 @@
 %error-verbose
+%parse-param {llvm_ctx *ctx}
 %{
   #include <stdio.h>
   #include "eval.h"
+  #include "../util.h"
   int yylex (void);
 
 /* Called by yyparse on error.  */
 extern int yylineno;
 
 void
-yyerror (char const *s)
+yyerror (llvm_ctx *ctx, char const *s)
 {
 	fprintf (stderr, "Error at line %d: %s\n", yylineno, s);
 }
@@ -46,7 +48,7 @@ yyerror (char const *s)
 
 prog:
 	%empty
-|	prog content	{ eval($2); tree_free($2); }
+|	prog content	{ eval(ctx, $2); tree_free($2); }
 ;
 
 content:
@@ -97,7 +99,7 @@ identifier_list:
 ;
 
 identifier:
-	TOK_IDENTIFIER	{ $$ = tree_new(TOK_IDENTIFIER); $$->v.s = $1; }
+	TOK_IDENTIFIER					{ $$ = tree_new(TOK_IDENTIFIER); $$->v.s = $1; }
 ;
 
 expression_list:

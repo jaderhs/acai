@@ -1,4 +1,5 @@
 #include "ast.h"
+#include "../llvm/ctx.h"
 #include "parser.h"
 #include <stdlib.h>
 
@@ -12,7 +13,9 @@ tree *tree_new(int type) {
 }
 
 void tree_free(tree *node) {
-	free(node);
+
+	if(node != NULL)
+		free(node);
 }
 
 tree *tree_new_with_children(int type, tree *left, tree *right) {
@@ -65,6 +68,16 @@ void tree_list_free(tree *parent) {
 	//tree_free(parent);
 }
 
+struct ast_list *tree_list_get_last(tree *parent) {
+
+	struct ast_list *l = parent->v.list;
+
+	while(l != NULL && l->next != NULL)
+		l = l->next;
+
+	return l;
+}
+
 tree *tree_variable_type_new(int type, int is_array) {
 
 	tree *parent = tree_new(type);
@@ -75,4 +88,23 @@ tree *tree_variable_type_new(int type, int is_array) {
 	parent->v.vt.is_array = is_array;
 
 	return parent;
+}
+
+tree *tree_op_new(int type, int op, int is_assignment, tree *left, tree *right) {
+
+	tree *parent = tree_new(type);
+
+	parent->v.op.op = op;
+	parent->v.op.is_assignment = is_assignment;
+
+	AST_OP_LEFT(parent) = left;
+	AST_OP_RIGHT(parent) = right;
+
+	return parent;
+}
+
+void tree_op_free(tree *parent) {
+
+	tree_free(AST_OP_LEFT(parent));
+	tree_free(AST_OP_RIGHT(parent));
 }

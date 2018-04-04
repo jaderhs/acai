@@ -1,13 +1,11 @@
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#ifndef TRUE
-#define TRUE ~0
-#endif
-
 #define AST_CHILD_LEFT(node) node->v.child[0]
 #define AST_CHILD_RIGHT(node) node->v.child[1]
+
+#define AST_OP_LEFT(node) node->v.op.child[0]
+#define AST_OP_RIGHT(node) node->v.op.child[1]
+
+#define AST_LIST_FOREACH(node, iter) for(iter = tree_list_get_last(node); iter != NULL; iter = iter->prev)
+#define AST_LIST_NODE(list) ((tree*)list->node)
 
 struct ast_list {
 
@@ -52,6 +50,7 @@ void tree_free(tree *node);
 tree *tree_list_new(int type, tree *child);
 tree *tree_list_prepend(tree *parent, tree *child);
 void tree_list_free(tree *parent);
+struct ast_list *tree_list_get_last(tree *parent);
 
 tree *tree_variable_type_new(int type, int is_array);
 
