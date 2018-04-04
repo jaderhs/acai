@@ -1,3 +1,27 @@
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#ifndef TRUE
+#define TRUE ~0
+#endif
+
+#define AST_CHILD_LEFT(node) node->v.child[0]
+#define AST_CHILD_RIGHT(node) node->v.child[1]
+
+struct ast_list {
+
+	struct ast_list *next;
+	struct ast_list *prev;
+	void *node; // a tree
+};
+
+struct ast_vtype {
+	int vtype;
+	int is_array;
+	void *content; // a tree
+};
+
 typedef struct ast_tree {
 
 	int type;
@@ -5,7 +29,21 @@ typedef struct ast_tree {
 
 		int i;
 		float f;
-		char *str;
+		char *s;
+		struct ast_list *list;
+		struct ast_tree *child[2];
+		struct ast_vtype vt;
 	} v;
 
 } tree;
+
+tree *tree_new(int type);
+tree *tree_new_with_children(int type, tree *left, tree *right);
+
+void tree_free(tree *node);
+
+tree *tree_list_new(int type, tree *child);
+tree *tree_list_prepend(tree *parent, tree *child);
+void tree_list_free(tree *parent);
+
+tree *tree_variable_type_new(int type, int is_array);
