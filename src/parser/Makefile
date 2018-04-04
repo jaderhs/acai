@@ -1,8 +1,16 @@
-parser: lexer parser.y
-	bison -o parser.c parser.y
+OBJECTS = parser.o lex.o ast.o
 
-lexer: lex.l
+all: lexer $(OBJECTS)
+	ar rcs parser.a $(OBJECTS)
+
+%.o: %.c
+	clang -c -o $@  $<
+
+lexer: parser lex.l
 	flex -o lex.c lex.l
 
+parser: parser.y
+	bison -d -o parser.c parser.y
+
 clean:
-	rm -f lex.c parser.c parser.h
+	rm -f lex.c parser.c parser.h $(OBJECTS) parser.a
