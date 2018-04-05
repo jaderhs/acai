@@ -65,7 +65,7 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 				sprintf(str, "func-call-argv%d", (argc+1));
 
 				arg = LLVMBuildAlloca(ctx->builder, llvm_value_type(), str);
-				LLVMBuildStore(ctx->builder, val, arg);
+				//LLVMBuildStore(ctx->builder, val, arg);
 
 				if(argc == argcap) {
 
@@ -85,15 +85,16 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 		str = malloc(24 + strlen(node->v.s));
 		sprintf(str, "func-call-%s-args", node->v.s);
 
-		args[i] = LLVMConstInt(LLVMInt64Type(), argc, FALSE);
-		args[++i] = LLVMBuildArrayAlloca(ctx->builder,
+		//args[i] = LLVMConstInt(LLVMInt64Type(), argc, FALSE);
+		//args[++i] = LLVMConstNull(LLVMArrayType(LLVMPointerType(llvm_value_type(), 0), 0));
+		/*LLVMBuildArrayAlloca(ctx->builder,
 						LLVMPointerType(llvm_value_type(), 0),
 						LLVMConstArray(LLVMPointerType(llvm_value_type(), 0), argv, argc),
-						str);
+						str);*/
 
 		str = malloc(16 + strlen(node->v.s));
 		sprintf(str, "func-call-%s", node->v.s);
 
-		LLVMBuildCall(ctx->builder, func, args, i+1, str);
+		//LLVMBuildCall(ctx->builder, func, args, i+1, str);
 	}
 }
