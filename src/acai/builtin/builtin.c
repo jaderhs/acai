@@ -20,7 +20,7 @@ acai_module *acai_builtin_get_module(void) {
 	return &acai_module_builtin;
 }
 
-void *acai_builtin_print(int argc, acai_type *argv[]) {
+void *acai_builtin_print(int argc, acai_value *argv[]) {
 
 	if(argc == 0)
 		return NULL;
@@ -32,12 +32,24 @@ void *acai_builtin_print(int argc, acai_type *argv[]) {
 
 		switch(argv[i]->type) {
 
-			case A
+			case AT_FLOAT:
+				printf("%f", argv[i]->v.f);
+				break;
+
+			case AT_INTEGER:
+				printf("%d", argv[i]->v.i);
+				break;
+
+			case AT_STRING:
+				printf("%s", argv[i]->v.s);
+				break;
 		}
 
 	}
 
 	if(argc > 1)
 		printf(")");
+
+	printf("\n");
 	return NULL;
 }

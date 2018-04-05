@@ -30,7 +30,7 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 	LLVMValueRef func;
 	LLVMValueRef args[3];
 
-	LLVMValueRef *argv, arg;
+	LLVMValueRef val, *argv, arg;
 	unsigned int argc, argcap;
 
 	tree *node = AST_CHILD_LEFT(call);
@@ -38,6 +38,16 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 	if(node->type == TOK_IDENTIFIER) {
 
 		func = LLVMGetNamedFunction(ctx->module, node->v.s);
+
+		i = 0;
+		if(func == NULL) {
+			str = malloc(16 + strlen(node->v.s));
+			sprintf(str, "func-name-%s", node->v.s);
+
+			func = acai_get_func_call();
+			args[i] = LLVMBuildGlobalStringPtr(ctx->builder, node->v.s, str);
+			i++;
+		}
 
 		right = AST_CHILD_RIGHT(call);
 
@@ -49,7 +59,13 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 			AST_LIST_FOREACH(right, l) {
 
-				arg = llvm_argument(ctx, AST_LIST_NODE(l));
+				val = llvm_argument(ctx, AST_LIST_NODE(l));
+
+				str = malloc(48);
+				sprintf(str, "func-call-argv%d", (argc+1));
+
+				arg = LLVMBuildAlloca(ctx->builder, llvm_value_type(), str);
+				LLVMBuildStore(ctx->builder, val, arg);
 
 				if(argc == argcap) {
 
@@ -63,22 +79,15 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 		}
 
-		i = 0;
-		if(func == NULL) {
-			str = malloc(16 + strlen(node->v.s));
-			sprintf(str, "func-name-%s", node->v.s);
-
-			func = acai_get_func_call();
-			args[i] = LLVMBuildGlobalStringPtr(ctx->builder, node->v.s, str);
-			i++;
-		}
+		argv[argc] = LLVMConstNull(llvm_value_type());
+		argc++;
 
 		str = malloc(24 + strlen(node->v.s));
 		sprintf(str, "func-call-%s-args", node->v.s);
 
 		args[i] = LLVMConstInt(LLVMInt64Type(), argc, FALSE);
 		args[++i] = LLVMBuildArrayAlloca(ctx->builder,
-						LLVMArrayType(LLVMPointerType(llvm_value_type(), 0), argc),
+						LLVMPointerType(llvm_value_type(), 0),
 						LLVMConstArray(LLVMPointerType(llvm_value_type(), 0), argv, argc),
 						str);
 

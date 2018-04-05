@@ -15,7 +15,7 @@ void _start(int argc, char **argv, char **env) {
 	exit(main(argc, argv, env));
 }
 
-void *acai_func_call(char *name, int argc, acai_type *argv[]) {
+void *acai_func_call(char *name, int argc, acai_value *argv[]) {
 
 	//split on '.'
 
