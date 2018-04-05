@@ -4,7 +4,9 @@
 
 void module_register(void) {
 
-	ACAI_MODULE_REGISTER("builtin", acai_module_builtin);
+	//ACAI_MODULE_REGISTER("my-module", acai_module_mymodule);
+
+	acai_module_register("builtin", NULL, acai_builtin_get_module(), TRUE);
 }
 
 struct acai_module_list {
@@ -35,7 +37,7 @@ acai_func acai_module_search_func(char *module, char *name) {
 
 	for(list = modules; list != NULL; list = list->next) {
 
-		if(module == NULL && list->global == FALSE) {
+		if(module == NULL && list->global == TRUE) {
 
 			for(i = 0; list->module->funcs[i].name != NULL; i++) {
 

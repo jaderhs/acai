@@ -116,53 +116,53 @@ int main(int argc, char *argv[]) {
 	}
 
 	//link
-	int i, arg_count = 0, arg_cap=100;
-	struct dirent *dentry;
+	if(fork() == 0) {
 
-	char *arg, **args = calloc(arg_cap, sizeof(char*));
+		int i, arg_count = 0, arg_cap=100;
+		struct dirent *dentry;
 
-	args[arg_count++] = "/usr/bin/ld";
+		char *arg, **args = calloc(arg_cap, sizeof(char*));
 
-	DIR *d = opendir("acai/");
-	while((dentry = readdir(d)) != NULL) {
+		args[arg_count++] = "/usr/bin/ld";
+		args[arg_count++] = "acai/acai.a";
 
-		i = strlen(dentry->d_name);
+		DIR *d = opendir("acai/");
+		while((dentry = readdir(d)) != NULL) {
 
-		if(i > 2 && strcmp(&dentry->d_name[i - 2], ".a") == 0) {
+			i = strlen(dentry->d_name);
 
-			arg = malloc(i + 16);
-			strcpy(arg, "acai/");
-			strcat(arg, dentry->d_name);
+			if(i > 2 && strcmp(&dentry->d_name[i - 2], ".a") == 0 && strcmp(dentry->d_name, "acai.a") != 0) {
 
-			args[arg_count++] = arg;
+				arg = malloc(i + 16);
+				strcpy(arg, "acai/");
+				strcat(arg, dentry->d_name);
+
+				args[arg_count++] = arg;
+			}
+
+			if(arg_count == arg_cap) {
+				arg_cap += 100;
+				args = reallocarray(args, arg_cap, sizeof(char*));
+			}
 		}
+		closedir(d);
 
-		if(arg_count == arg_cap) {
-			arg_cap += 100;
+
+		if(arg_count+7 == arg_cap) {
+			arg_cap += 10;
 			args = reallocarray(args, arg_cap, sizeof(char*));
 		}
-	}
-	closedir(d);
 
+		args[arg_count++] = "output.o";
 
-	if(arg_count+7 == arg_cap) {
-		arg_cap += 10;
-		args = reallocarray(args, arg_cap, sizeof(char*));
-	}
+		args[arg_count++] = "-o";
+		args[arg_count++] = output;
 
-	args[arg_count++] = "output.o";
+		args[arg_count++] = "-lc";
+		args[arg_count++] = "-dynamic-linker";
+		args[arg_count++] = "/lib64/ld-linux-x86-64.so.2";
+		args[arg_count++] = NULL;
 
-	args[arg_count++] = "-o";
-	args[arg_count++] = output;
-
-	args[arg_count++] = "-lc";
-	args[arg_count++] = "-dynamic-linker";
-	args[arg_count++] = "/lib64/ld-linux-x86-64.so.2";
-	args[arg_count++] = NULL;
-
-	if(fork() == 0) {
-		const char *cmd = "/usr/bin/ld";
-		//execl(cmd, cmd, "-o", output, "output.o", "acai/acai.a", "-lc", "-dynamic-linker", "/lib64/ld-linux-x86-64.so.2", NULL);
 		execv(args[0], args);
 	}
 #else

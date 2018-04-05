@@ -4,6 +4,7 @@ typedef struct {
 	int type;
 	union {
 		int i;
+		float f;
 		char *s;
 	} v;
 } acai_type;
