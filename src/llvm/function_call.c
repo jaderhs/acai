@@ -8,29 +8,31 @@
 #include "../parser/ast.h"
 #include "../parser/parser.h"
 
-LLVMValueRef llvm_argument(llvm_ctx *ctx, tree *node) {
+int llvm_argument(llvm_ctx *ctx, tree *node, llvm_acai_value *val) {
 
 	switch(node->type) {
 
 		case LIT_INTEGER:
-			return llvm_value_new_integer(ctx, node->v.i);
+			llvm_value_new_integer(ctx, node->v.i, val);
+			return TRUE;
 	}
 
 	printf("Unknown llvm node arg=%p type=%d\n", node, node->type);
 
-	return NULL;
+	return FALSE;
 }
 
 void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
-	int i;
+	int i, j;
 	char *str;
 	tree *right;
 	struct ast_list *l;
 	LLVMValueRef func;
 	LLVMValueRef args[3];
 
-	LLVMValueRef val, *argv, arg;
+	llvm_acai_value acai_value;
+	LLVMValueRef *val, atp, argv_array, *argv, arg;
 	unsigned int argc, argcap;
 
 	tree *node = AST_CHILD_LEFT(call);
@@ -59,42 +61,86 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 			AST_LIST_FOREACH(right, l) {
 
-				val = llvm_argument(ctx, AST_LIST_NODE(l));
+				if(llvm_argument(ctx, AST_LIST_NODE(l), &acai_value) == FALSE) {
+
+				}
+
+				/* alloc acai_type{} */
 
 				str = malloc(48);
 				sprintf(str, "func-call-argv%d", (argc+1));
 
 				arg = LLVMBuildAlloca(ctx->builder, llvm_value_type(), str);
-				//LLVMBuildStore(ctx->builder, val, arg);
 
+				/* Set acai_type.type */
+
+				str = malloc(48);
+				sprintf(str, "func-call-argv%d.type", (argc+1));
+
+				atp = LLVMBuildStructGEP(ctx->builder, arg, 0, str);
+				LLVMBuildStore(ctx->builder, acai_value.acai_type, atp);
+
+				/* Set acai_type.v */
+
+				/* Get pointer for acai_Type.v */
+				str = malloc(48);
+				sprintf(str, "func-call-argv%d.v", (argc+1));
+
+				atp = LLVMBuildStructGEP(ctx->builder, arg, 1, str);
+
+				/* cast v to argument type */
+
+				str = malloc(48);
+				sprintf(str, "func-call-argv%d.v", (argc+1));
+
+				atp = LLVMBuildBitCast(ctx->builder, atp, LLVMPointerType(acai_value.type, 0), str);
+				LLVMBuildStore(ctx->builder, acai_value.val, atp);
+
+				argv[argc] = arg;
+
+				argc++;
 				if(argc == argcap) {
 
 					argcap += 10;
 					argv = reallocarray(argv, argcap, sizeof(LLVMValueRef));
 				}
-
-				argv[argc] = arg;
-				argc++;
 			}
 
 		}
 
 		argv[argc] = LLVMConstNull(llvm_value_type());
-		argc++;
 
 		str = malloc(24 + strlen(node->v.s));
-		sprintf(str, "func-call-%s-args", node->v.s);
+		sprintf(str, "func-call-%s-argv", node->v.s);
+/*
+		atp = LLVMBuildStructGEP(ctx->builder, arg, 0, str);
+		LLVMBuildStore(ctx->builder, val[0], atp);
+*/
 
-		//args[i] = LLVMConstInt(LLVMInt64Type(), argc, FALSE);
-		//args[++i] = LLVMConstNull(LLVMArrayType(LLVMPointerType(llvm_value_type(), 0), 0));
-		/*LLVMBuildArrayAlloca(ctx->builder,
-						LLVMPointerType(llvm_value_type(), 0),
-						LLVMConstArray(LLVMPointerType(llvm_value_type(), 0), argv, argc),
-						str);*/
+		args[i++] = LLVMConstInt(LLVMInt64Type(), argc, FALSE);
+		//args[++i] = LLVMConstNull(LLVMPointerType(LLVMPointerType(llvm_value_type(), 0), 0));
+		argv_array = LLVMBuildAlloca(ctx->builder,
+						LLVMArrayType(LLVMPointerType(llvm_value_type(), 0), argc),
+//						LLVMConstArray(LLVMPointerType(llvm_value_type(), 0), argv, argc),
+						str);
+
+		/* store argv */
+		LLVMValueRef idx[2];
+		for(j = 0; j < argc; j++) {
+
+			idx[0] = LLVMConstInt(LLVMInt64Type(), 0, FALSE);
+			idx[1] = LLVMConstInt(LLVMInt64Type(), j, FALSE);
+
+			atp = LLVMBuildGEP(ctx->builder, argv_array, idx, 2, "");
+			LLVMBuildStore(ctx->builder, argv[j], atp);
+		}
+
+		atp = LLVMConstInt(LLVMInt64Type(), 0, FALSE);
+		args[i++] = LLVMBuildGEP(ctx->builder, argv_array, &atp, 1, "");
 
 		str = malloc(16 + strlen(node->v.s));
 		sprintf(str, "func-call-%s", node->v.s);
 
-		//LLVMBuildCall(ctx->builder, func, args, i+1, str);
+		LLVMBuildCall(ctx->builder, func, args, i, str);
 	}
 }
