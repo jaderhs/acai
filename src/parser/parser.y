@@ -26,6 +26,7 @@ yyerror (llvm_ctx *ctx, char const *s)
 %token <i> LIT_INTEGER
 %token <f> LIT_FLOAT
 %token <s> LIT_STRING
+%token <i> LIT_BOOLEAN
 
 %token <i> TOK_TYPENAME
 %token <s> TOK_IDENTIFIER
@@ -41,7 +42,7 @@ yyerror (llvm_ctx *ctx, char const *s)
 %type <t> declaration_variable declaration_variable_value
 %type <t> typed_identifier_list type identifier identifier_list
 %type <t> expression expression_list unary_expression primary_expression operand literal
-%type <t> literal_float literal_integer literal_string
+%type <t> literal_float literal_integer literal_string literal_boolean
 
 
 %%
@@ -130,6 +131,7 @@ literal:
 	literal_float
 |	literal_integer
 |	literal_string
+|	literal_boolean
 ;
 
 literal_float:
@@ -142,4 +144,8 @@ literal_integer:
 
 literal_string:
 	LIT_STRING		{ $$ = tree_new(LIT_STRING); $$->v.s = $1; }
+;
+
+literal_boolean:
+	LIT_BOOLEAN		{ $$ = tree_new(LIT_BOOLEAN); $$->v.i = $1; }
 ;
