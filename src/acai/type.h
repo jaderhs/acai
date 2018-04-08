@@ -5,7 +5,7 @@ enum acai_type {
 };
 
 typedef struct {
-	enum acai_type type;
+	unsigned long type; //acai_type
 	union {
 		int i;
 		float f;

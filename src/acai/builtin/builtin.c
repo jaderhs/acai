@@ -30,6 +30,9 @@ void *acai_builtin_print(int argc, acai_value *argv[]) {
 
 	for(int i = 0; i < argc; i++) {
 
+		if(i > 1)
+			printf(", ");
+
 		switch(argv[i]->type) {
 
 			case AT_FLOAT:

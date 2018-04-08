@@ -2,13 +2,13 @@
 #include <stdio.h>
 #include "module.h"
 
-extern int _init(int, char **, char **);
+extern int _acai_init(int, char **, char **);
 
 int main(int argc, char *argv[], char *env[]) {
 
 	module_register();
 
-	return _init(argc, argv, env);
+	return _acai_init(argc, argv, env);
 }
 
 void _start(int argc, char **argv, char **env) {

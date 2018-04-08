@@ -31,7 +31,7 @@ void llvm_create_main(llvm_ctx *ctx) {
 
 	LLVMTypeRef func_spec = LLVMFunctionType(LLVMVoidType(), params, 2, FALSE);
 
-	LLVMValueRef func = LLVMAddFunction(ctx->module, "_init", func_spec);
+	LLVMValueRef func = LLVMAddFunction(ctx->module, "_acai_init", func_spec);
 
 	LLVMBasicBlockRef bblock = LLVMAppendBasicBlockInContext(ctx->ctx, func, "entrypoint");
 	LLVMPositionBuilderAtEnd(ctx->builder, bblock);
