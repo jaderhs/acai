@@ -11,7 +11,7 @@
 DIGIT			[0-9]
 IDENTIFIER		[[:alpha:]_][[:alnum:]_]*
 
-SINGLE_TOKEN	[\(\)=]
+SINGLE_TOKEN	[\(\)=,]
 
 %%
 	lex_str str;

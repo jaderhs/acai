@@ -113,7 +113,7 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 		}
 
-		argv[argc] = LLVMConstNull(llvm_value_type());
+		argv[argc] = LLVMConstPointerNull(LLVMPointerType(llvm_value_type(), 0));
 
 		str = malloc(24 + strlen(node->v.s));
 		sprintf(str, "func-call-%s-argv", node->v.s);
