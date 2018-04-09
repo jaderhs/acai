@@ -32,7 +32,7 @@ typedef struct ast_tree {
 	union {
 
 		int i;
-		float f;
+		double f;
 		char *s;
 		struct ast_list *list;
 		struct ast_tree *child[2];

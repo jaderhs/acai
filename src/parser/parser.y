@@ -17,7 +17,7 @@ yyerror (llvm_ctx *ctx, char const *s)
 %}
 
 %union {
-	float f;
+	double f;
 	int i;
 	char *s;
 	tree *t;
