@@ -40,7 +40,7 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 	LLVMValueRef args[3];
 
 	llvm_acai_value acai_value;
-	LLVMValueRef valstr, atp, argv_array, *argv, arg;
+	LLVMValueRef valstr, off, atp, argv_array, *argv, arg;
 	unsigned int argc, argcap;
 
 	tree *node = AST_CHILD_LEFT(call);
@@ -76,6 +76,8 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 				/* alloc acai_type{} */
 				arg = LLVMBuildAlloca(ctx->builder, llvm_value_type(), "");
 
+				LLVMSetAlignment(arg, 32);
+
 				/* Set acai_type.type */
 				atp = LLVMBuildStructGEP(ctx->builder, arg, 0, "");
 				LLVMBuildStore(ctx->builder, acai_value.acai_type, atp);
@@ -89,10 +91,10 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 				/* Set acai_type.v */
 
 				/* Get pointer for acai_type.v */
-				atp = LLVMBuildStructGEP(ctx->builder, arg, 1, "");
+				off = LLVMBuildStructGEP(ctx->builder, arg, 2, "");
 
 				/* cast v to argument type */
-				atp = LLVMBuildBitCast(ctx->builder, atp, LLVMPointerType(acai_value.type, 0), "");
+				atp = LLVMBuildBitCast(ctx->builder, off, LLVMPointerType(acai_value.type, 0), "");
 
 				if(AST_LIST_NODE(l)->type == LIT_STRING) {
 					LLVMBuildStore(ctx->builder, valstr, atp);
@@ -131,14 +133,16 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 		/* store argv */
 		LLVMValueRef idx[2];
+		idx[0] = LLVMConstInt(LLVMInt64Type(), 0, FALSE);
 		for(j = 0; j < argc+1; j++) {
-
-			idx[0] = LLVMConstInt(LLVMInt64Type(), 0, FALSE);
 			idx[1] = LLVMConstInt(LLVMInt64Type(), j, FALSE);
 
 			atp = LLVMBuildGEP(ctx->builder, argv_array, idx, 2, "");
 			LLVMBuildStore(ctx->builder, argv[j], atp);
 		}
+
+		idx[0] = LLVMConstInt(LLVMInt64Type(), argc + 2, FALSE);
+		atp = LLVMBuildGEP(ctx->builder, argv_array, idx, 2, "");
 
 		atp = LLVMConstInt(LLVMInt64Type(), 0, FALSE);
 		args[i++] = LLVMBuildGEP(ctx->builder, argv_array, &atp, 1, "");
