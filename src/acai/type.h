@@ -23,8 +23,8 @@ enum acai_type {
 
 typedef struct {
 	unsigned long type; //acai_type
+	char pad[8];
 	union {
-		int i;
 		int b;
 
 		signed char i8;

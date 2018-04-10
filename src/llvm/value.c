@@ -10,12 +10,13 @@ LLVMTypeRef llvm_value_struct = NULL;
 void llvm_value_init(llvm_ctx *ctx) {
 
 	/* Build acai_value */
-	LLVMTypeRef arg_body[2];
+	LLVMTypeRef arg_body[3];
 	arg_body[0] = LLVMInt64TypeInContext(ctx->ctx);
-	arg_body[1] = LLVMArrayType(LLVMInt8TypeInContext(ctx->ctx), sizeof(((acai_value*)0)->v));
+	arg_body[1] = LLVMArrayType(LLVMInt8TypeInContext(ctx->ctx), 8); //padding
+	arg_body[2] = LLVMArrayType(LLVMInt8TypeInContext(ctx->ctx), sizeof(((acai_value*)0)->v));
 
 	llvm_value_struct = LLVMStructCreateNamed(ctx->ctx, "struct.acai_value");
-	LLVMStructSetBody(llvm_value_struct, arg_body, 2, FALSE);
+	LLVMStructSetBody(llvm_value_struct, arg_body, 3, FALSE);
 }
 
 LLVMTypeRef llvm_value_type(void) {

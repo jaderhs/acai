@@ -37,11 +37,11 @@ void *acai_builtin_print(int argc, acai_value *argv[]) {
 
 			case AT_FLOAT:
 			case AT_FLOAT32:
-				printf("%f", argv[i]->v.f32);
+				printf("%f", (float)argv[i]->v.f32);
 				break;
 
 			case AT_INTEGER:
-				printf("%d", argv[i]->v.i);
+				printf("%lld", argv[i]->v.i64);
 				break;
 
 			case AT_STRING:
