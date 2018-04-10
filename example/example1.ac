@@ -1,4 +1,3 @@
-int x = 1
-
-print(x)
-print(2)
+print(99)
+print("hello", 123)
+print("world", 456, 99.55)
