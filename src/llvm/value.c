@@ -26,9 +26,40 @@ LLVMTypeRef llvm_value_type(void) {
 	return llvm_value_struct;
 }
 
-LLVMValueRef llvm_value_integer_new(llvm_ctx *ctx, int i) {
+void llvm_value_literal_new(llvm_ctx *ctx, tree *node) {
 
-	return LLVMConstInt(LLVMInt64TypeInContext(ctx->ctx), i, FALSE);
+	switch(node->type) {
+
+		case LIT_INTEGER:
+
+			node->llvm_type = LLVMInt64TypeInContext(ctx->ctx);
+			node->llvm_value = LLVMConstInt(node->llvm_type, node->v.i, FALSE);
+			break;
+
+		case LIT_FLOAT:
+			node->llvm_type = LLVMFloatTypeInContext(ctx->ctx);
+			node->llvm_value = LLVMConstReal(node->llvm_type, node->v.f);
+			break;
+
+		default:
+			fprintf(stderr, "Unknown literal type (%d) on llvm_value_literal_new()\n", node->type);
+	}
+}
+
+LLVMValueRef llvm_value_zero_initializer(llvm_ctx *ctx, int type) {
+
+	switch(type) {
+
+		case AT_INT64:
+		case AT_INTEGER:
+			return LLVMConstInt(LLVMInt64TypeInContext(ctx->ctx), 0, FALSE);
+
+		case AT_FLOAT32:
+			return LLVMConstReal(LLVMFloatTypeInContext(ctx->ctx), 0.0);
+
+	}
+
+	return NULL;
 }
 
 void llvm_value_new_integer(llvm_ctx *ctx, int i, llvm_acai_value *val) {

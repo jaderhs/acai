@@ -70,6 +70,11 @@ void tree_list_free(tree *parent) {
 	//tree_free(parent);
 }
 
+struct ast_list *tree_list_get_first(tree *parent) {
+
+	return parent->v.list;
+}
+
 struct ast_list *tree_list_get_last(tree *parent) {
 
 	struct ast_list *l = parent->v.list;

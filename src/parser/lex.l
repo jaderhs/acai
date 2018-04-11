@@ -50,6 +50,11 @@ SINGLE_TOKEN	[\(\)=,]
 "uint64"					{ yylval.i = AT_UINT64; return TOK_TYPENAME; }
 "uint128"					{ yylval.i = AT_UINT128; return TOK_TYPENAME; }
 
+"float"						{ yylval.i = AT_FLOAT32; return TOK_TYPENAME; }
+"float32"					{ yylval.i = AT_FLOAT32; return TOK_TYPENAME; }
+"float64"					{ yylval.i = AT_FLOAT64; return TOK_TYPENAME; }
+"float80"					{ yylval.i = AT_FLOAT80; return TOK_TYPENAME; }
+
 "byte"						{ yylval.i = AT_UINT8; return TOK_TYPENAME; }
 
 "string"					{ yylval.i = AT_STRING; return TOK_TYPENAME; }

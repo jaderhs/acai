@@ -12,3 +12,11 @@ LLVMValueRef llvm_decl_var(llvm_ctx *ctx, tree *typed_identifier) {
 
 	return LLVMBuildAlloca(ctx->builder, AST_CHILD_LEFT(typed_identifier)->llvm_type, str);
 }
+
+LLVMValueRef llvm_decl_var_assigndeclare(llvm_ctx *ctx, tree *identifier, tree *node_literal) {
+
+	char *str = malloc(32 + strlen(identifier->v.s));
+	sprintf(str, "identifier-%s", identifier->v.s);
+
+	return LLVMBuildAlloca(ctx->builder, node_literal->llvm_type, str);
+}
