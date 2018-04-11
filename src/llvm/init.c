@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <llvm-c/Target.h>
+#include "../parser/ast.h"
 #include "ctx.h"
 #include "acai.h"
 #include "value.h"
@@ -9,6 +10,8 @@ void llvm_create_module(char *name, llvm_ctx *ctx) {
 
 	ctx->module = LLVMModuleCreateWithNameInContext(name, ctx->ctx);
 	ctx->builder = LLVMCreateBuilderInContext(ctx->ctx);
+
+	ctx->scope = llvm_scope_identifier_list_prepend_new(ctx->scope);
 }
 
 void llvm_init(llvm_ctx *ctx) {

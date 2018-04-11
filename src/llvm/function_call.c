@@ -1,14 +1,16 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
+#include "../parser/ast.h"
 #include "ctx.h"
 #include "acai.h"
 #include "value.h"
 #include "../util.h"
-#include "../parser/ast.h"
 #include "../parser/parser.h"
 
 int llvm_argument(llvm_ctx *ctx, tree *node, llvm_acai_value *val) {
+
+	tree *p;
 
 	switch(node->type) {
 
@@ -22,6 +24,16 @@ int llvm_argument(llvm_ctx *ctx, tree *node, llvm_acai_value *val) {
 
 		case LIT_STRING:
 			llvm_value_new_string(ctx, node->v.s, val);
+			return TRUE;
+
+		case TOK_IDENTIFIER:
+			p = llvm_identifier_list_lookup_by_name(ctx->scope->identifiers, node->v.s);
+			if(p == NULL) {
+				printf("Error fetching identifier %s\n", node->v.s);
+				return FALSE;
+			}
+
+			llvm_value_new_identifier(ctx, p, val);
 			return TRUE;
 	}
 
@@ -140,9 +152,6 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 			atp = LLVMBuildGEP(ctx->builder, argv_array, idx, 2, "");
 			LLVMBuildStore(ctx->builder, argv[j], atp);
 		}
-
-		idx[0] = LLVMConstInt(LLVMInt64Type(), argc + 2, FALSE);
-		atp = LLVMBuildGEP(ctx->builder, argv_array, idx, 2, "");
 
 		atp = LLVMConstInt(LLVMInt64Type(), 0, FALSE);
 		args[i++] = LLVMBuildGEP(ctx->builder, argv_array, &atp, 1, "");

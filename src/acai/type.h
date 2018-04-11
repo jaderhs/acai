@@ -1,4 +1,7 @@
 enum acai_type {
+
+	AT_AUTO,
+
 	AT_INTEGER, //AT_INT64
 	AT_INT8,
 	AT_INT16,

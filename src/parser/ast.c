@@ -2,10 +2,12 @@
 #include "../llvm/ctx.h"
 #include "parser.h"
 #include <stdlib.h>
+#include <string.h>
 
 tree *tree_new(int type) {
 
 	tree *node = malloc(sizeof(tree));
+	memset(node, 0, sizeof(tree));
 
 	node->type = type;
 

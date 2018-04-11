@@ -1,3 +1,5 @@
+#include <llvm-c/Core.h>
+
 #define AST_CHILD_LEFT(node) node->v.child[0]
 #define AST_CHILD_RIGHT(node) node->v.child[1]
 
@@ -39,6 +41,9 @@ typedef struct ast_tree {
 		struct ast_vtype vt;
 		struct ast_op op;
 	} v;
+
+	LLVMTypeRef llvm_type;
+	LLVMValueRef llvm_value;
 
 } tree;
 

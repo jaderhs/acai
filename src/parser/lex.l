@@ -4,9 +4,10 @@
 #include "str.h"
 #include "../llvm/ctx.h"
 #include "parser.h"
+#include "../acai/type.h"
 %}
 
-%x	string
+%x	string comment
 
 DIGIT			[0-9]
 IDENTIFIER		[[:alpha:]_][[:alnum:]_]*
@@ -22,16 +23,42 @@ SINGLE_TOKEN	[\(\)=,]
 -?"."{DIGIT}+				{ yylval.f = atof(yytext); return LIT_FLOAT; }
 -?{DIGIT}+"e"[-+]?{DIGIT}+	{ yylval.f = atof(yytext); return LIT_FLOAT; }
 
+"0x"[0-9a-fA-F]+			{ yylval.i = strtol(&yytext[2], NULL, 16); return LIT_INTEGER; }
+
 "true"						{ yylval.i = 1; return LIT_BOOLEAN; }
 "false"						{ yylval.i = 0; return LIT_BOOLEAN; }
-
-{IDENTIFIER}				{ yylval.s = strdup(yytext); return TOK_IDENTIFIER; }
-
-{SINGLE_TOKEN}				{ return yytext[0]; }
 
 	/* operators */
 
 ":="						{ return TOK_OP_ASSIGNDECLARE; }
+
+	/* types */
+
+"var"						{ yylval.i = AT_AUTO; return TOK_TYPENAME; }
+
+"int"						{ yylval.i = AT_INT64; return TOK_TYPENAME; }
+"int8"						{ yylval.i = AT_INT8; return TOK_TYPENAME; }
+"int16"						{ yylval.i = AT_INT16; return TOK_TYPENAME; }
+"int32"						{ yylval.i = AT_INT32; return TOK_TYPENAME; }
+"int64"						{ yylval.i = AT_INT64; return TOK_TYPENAME; }
+"int128"					{ yylval.i = AT_INT128; return TOK_TYPENAME; }
+
+"uint"						{ yylval.i = AT_UINT64; return TOK_TYPENAME; }
+"uint8"						{ yylval.i = AT_UINT8; return TOK_TYPENAME; }
+"uint16"					{ yylval.i = AT_UINT16; return TOK_TYPENAME; }
+"uint32"					{ yylval.i = AT_UINT32; return TOK_TYPENAME; }
+"uint64"					{ yylval.i = AT_UINT64; return TOK_TYPENAME; }
+"uint128"					{ yylval.i = AT_UINT128; return TOK_TYPENAME; }
+
+"byte"						{ yylval.i = AT_UINT8; return TOK_TYPENAME; }
+
+"string"					{ yylval.i = AT_STRING; return TOK_TYPENAME; }
+
+
+
+{SINGLE_TOKEN}				{ return yytext[0]; }
+
+{IDENTIFIER}				{ yylval.s = strdup(yytext); return TOK_IDENTIFIER; }
 
 "\""						{ lex_str_truncate(&str); BEGIN(string); }
 <string>\\n					{ lex_str_append_c(&str, '\n'); }
@@ -81,6 +108,14 @@ SINGLE_TOKEN	[\(\)=,]
 <string>\n				{ lex_str_append_c(&str, '\n'); }
 <string>[^\\"\n]*		{ lex_str_append(&str, yytext); }
 <string>"\""			{ BEGIN(0); yylval.s = lex_str_str(str); return LIT_STRING; }
+
+
+"//"[^\n]*					/* skip one-line comments */
+
+"/*"					BEGIN(comment);
+<comment>[^*]*			/* skip everything that's not a '*' */
+<comment>"*"+[^*/\n]*	/* skip '*' not followed by '/' */
+<comment>"*/"			BEGIN(0);
 
 
 [\t\r\n ]*				/* skip whitespaces */

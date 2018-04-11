@@ -36,11 +36,12 @@ yyerror (llvm_ctx *ctx, char const *s)
 
 %token DECL_VAR FUNC_CALL
 %token KEYWORD_IMPORT KEYWORD_AS
-%token LIST_STATEMENT LIST_IDENTIFIER LIST_EXPRESSION
+%token LIST_STATEMENT LIST_IDENTIFIER LIST_EXPRESSION LIST_TYPED_IDENTIFIER
+%token TYPED_IDENTIFIER
 
 %type <t> content import statement statement_spec simple_statement
 %type <t> declaration_variable declaration_variable_value
-%type <t> typed_identifier_list type identifier identifier_list
+%type <t> typed_identifier_list type identifier typed_identifier identifier_list
 %type <t> expression expression_list unary_expression primary_expression operand literal
 %type <t> literal_float literal_integer literal_string literal_boolean
 
@@ -87,7 +88,11 @@ declaration_variable_value:
 ;
 
 typed_identifier_list:
-	type identifier_list
+	type identifier_list									{ $$ = tree_new_with_children(LIST_TYPED_IDENTIFIER, $1, $2); }
+;
+
+typed_identifier:
+	type identifier											{ $$ = tree_new_with_children(TYPED_IDENTIFIER, $1, $2); }
 ;
 
 type:

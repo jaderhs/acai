@@ -1,3 +1,4 @@
+#include "../parser/ast.h"
 #include "ctx.h"
 #include "value.h"
 #include "../util.h"

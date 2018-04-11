@@ -1,4 +1,8 @@
 #include <llvm-c/Core.h>
+#include "identifier.h"
+
+#ifndef _LLVM_CTX_H_
+#define _LLVM_CTX_H_
 
 typedef struct {
 
@@ -6,4 +10,8 @@ typedef struct {
 	LLVMModuleRef module;
 	LLVMBuilderRef builder;
 
+	llvm_scope_identifier_list *scope;
+
 } llvm_ctx;
+
+#endif

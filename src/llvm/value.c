@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include "../parser/ast.h"
 #include "ctx.h"
+#include "../parser/parser.h"
 #include "value.h"
 #include "../acai/type.h"
 #include "../util.h"
@@ -21,6 +24,11 @@ void llvm_value_init(llvm_ctx *ctx) {
 
 LLVMTypeRef llvm_value_type(void) {
 	return llvm_value_struct;
+}
+
+LLVMValueRef llvm_value_integer_new(llvm_ctx *ctx, int i) {
+
+	return LLVMConstInt(LLVMInt64TypeInContext(ctx->ctx), i, FALSE);
 }
 
 void llvm_value_new_integer(llvm_ctx *ctx, int i, llvm_acai_value *val) {
@@ -48,4 +56,18 @@ void llvm_value_new_string(llvm_ctx *ctx, char *str, llvm_acai_value *val) {
 
 	val->type = LLVMPointerType(LLVMInt8TypeInContext(ctx->ctx), 0);
 	val->val = LLVMConstStringInContext(ctx->ctx, str, strlen(str), FALSE);//LLVMConstPointerNull(LLVMInt8TypeInContext(ctx->ctx));
+}
+
+void llvm_value_new_identifier(llvm_ctx *ctx, tree *identifier, llvm_acai_value *val) {
+
+	if(identifier->type != TYPED_IDENTIFIER) {
+		printf("Unknown value new identifier type %d\n", identifier->type);
+		return;
+	}
+
+	val->acai_type = LLVMConstInt(LLVMInt64TypeInContext(ctx->ctx), AST_CHILD_LEFT(identifier)->v.vt.vtype, FALSE);
+
+	val->type = AST_CHILD_LEFT(identifier)->llvm_type;
+	val->val = LLVMBuildLoad(ctx->builder, identifier->llvm_value, "");
+
 }

@@ -41,6 +41,7 @@ void *acai_builtin_print(int argc, acai_value *argv[]) {
 				break;
 
 			case AT_INTEGER:
+			case AT_INT64:
 				printf("%lld", argv[i]->v.i64);
 				break;
 
