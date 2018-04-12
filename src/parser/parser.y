@@ -34,13 +34,13 @@ yyerror (llvm_ctx *ctx, char const *s)
 %token TOK_OP_ASSIGNDECLARE
 %token OP_UNARY OP_BINARY
 
-%token DECL_VAR FUNC_CALL
-%token KEYWORD_IMPORT KEYWORD_AS
+%token DECL_VAR DECL_CONST FUNC_CALL
+%token KEYWORD_IMPORT KEYWORD_AS KEYWORD_CONST
 %token LIST_STATEMENT LIST_IDENTIFIER LIST_EXPRESSION LIST_TYPED_IDENTIFIER
 %token TYPED_IDENTIFIER
 
 %type <t> content import statement statement_spec simple_statement
-%type <t> declaration_variable declaration_variable_value
+%type <t> declaration_variable declaration_variable_value declaration_const
 %type <t> typed_identifier_list type identifier typed_identifier identifier_list
 %type <t> expression expression_list unary_expression primary_expression operand literal
 %type <t> literal_float literal_integer literal_string literal_boolean
@@ -50,7 +50,7 @@ yyerror (llvm_ctx *ctx, char const *s)
 
 prog:
 	%empty
-|	prog content	{ eval(ctx, $2); tree_free($2); }
+|	prog content	{ eval(ctx, $2, 0); tree_free($2); }
 ;
 
 content:
@@ -70,6 +70,7 @@ statement:
 
 statement_spec:
 	simple_statement
+|	declaration_const
 ;
 
 simple_statement:
@@ -85,6 +86,10 @@ declaration_variable:
 declaration_variable_value:
 	typed_identifier_list '=' expression_list				{ $$ = tree_new_with_children(DECL_VAR, tree_op_new(OP_BINARY, '=', TRUE, $1, $3), NULL); }
 |	identifier_list TOK_OP_ASSIGNDECLARE expression_list	{ $$ = tree_new_with_children(DECL_VAR, tree_op_new(OP_BINARY, TOK_OP_ASSIGNDECLARE, TRUE, $1, $3), NULL); }
+;
+
+declaration_const:
+	KEYWORD_CONST declaration_variable_value				{  $$ = tree_new_with_children(DECL_CONST, $2, NULL); }
 ;
 
 typed_identifier_list:

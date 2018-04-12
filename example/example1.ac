@@ -5,13 +5,20 @@ is a
 multiline comment
 */
 
+string b = "hello" ; //optional semicolons
+
+print(b, "world")
+
 int x,y = 99
 
 float w,z = 99.55
-
-b := 95
 
 print(2, x, 3)
 print("hello", 123, y)
 print("world", 456, w, z, b)
 
+
+string s
+int i
+float f
+print(s, i, f)

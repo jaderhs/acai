@@ -34,7 +34,7 @@ SINGLE_TOKEN	[\(\)=,]
 
 	/* types */
 
-"var"						{ yylval.i = AT_AUTO; return TOK_TYPENAME; }
+"const"						{ return KEYWORD_CONST; }
 
 "int"						{ yylval.i = AT_INT64; return TOK_TYPENAME; }
 "int8"						{ yylval.i = AT_INT8; return TOK_TYPENAME; }

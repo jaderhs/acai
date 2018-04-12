@@ -41,6 +41,11 @@ void llvm_value_literal_new(llvm_ctx *ctx, tree *node) {
 			node->llvm_value = LLVMConstReal(node->llvm_type, node->v.f);
 			break;
 
+		case LIT_STRING:
+			node->llvm_type = LLVMArrayType(LLVMInt8TypeInContext(ctx->ctx), strlen(node->v.s) + 1);
+			node->llvm_value = LLVMConstStringInContext(ctx->ctx, node->v.s, strlen(node->v.s), FALSE);
+			break;
+
 		default:
 			fprintf(stderr, "Unknown literal type (%d) on llvm_value_literal_new()\n", node->type);
 	}
@@ -57,6 +62,11 @@ LLVMValueRef llvm_value_zero_initializer(llvm_ctx *ctx, int type) {
 		case AT_FLOAT32:
 			return LLVMConstReal(LLVMFloatTypeInContext(ctx->ctx), 0.0);
 
+		case AT_STRING:
+			return LLVMConstInt(LLVMInt8TypeInContext(ctx->ctx), 0, FALSE);
+
+		default:
+			fprintf(stderr, "Unknown literal type (%d) on llvm_value_zero_initializer()\n", type);
 	}
 
 	return NULL;
@@ -99,6 +109,15 @@ void llvm_value_new_identifier(llvm_ctx *ctx, tree *identifier, llvm_acai_value 
 	val->acai_type = LLVMConstInt(LLVMInt64TypeInContext(ctx->ctx), AST_CHILD_LEFT(identifier)->v.vt.vtype, FALSE);
 
 	val->type = AST_CHILD_LEFT(identifier)->llvm_type;
-	val->val = LLVMBuildLoad(ctx->builder, identifier->llvm_value, "");
 
+	if(AST_CHILD_LEFT(identifier)->v.i == AT_STRING) {
+
+		LLVMValueRef idx[1], p;
+		idx[0] = LLVMConstInt(LLVMInt32TypeInContext(ctx->ctx), 0, FALSE);
+
+		p = LLVMBuildGEP(ctx->builder, identifier->llvm_value, idx, 1, "");
+		val->val = LLVMBuildBitCast(ctx->builder, p, LLVMPointerType(LLVMInt8TypeInContext(ctx->ctx), 0), "");
+	}
+	else
+		val->val = LLVMBuildLoad(ctx->builder, identifier->llvm_value, "");
 }

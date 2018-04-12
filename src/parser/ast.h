@@ -45,6 +45,8 @@ typedef struct ast_tree {
 	LLVMTypeRef llvm_type;
 	LLVMValueRef llvm_value;
 
+	unsigned int flags;
+
 } tree;
 
 tree *tree_new(int type);
