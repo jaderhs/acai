@@ -1,4 +1,4 @@
-#include "ast.h"
+#include "../parser/ast.h"
 #include "../llvm/ctx.h"
 
 #define EVAL_HINT_DECL_VAR_DONT_INITIALIZE	1

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "eval.h"
-#include "parser.h"
+#include "../parser/parser.h"
 #include "../util.h"
 #include "../llvm/value.h"
 #include "../llvm/llvm.h"

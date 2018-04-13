@@ -2,7 +2,7 @@
 %parse-param {llvm_ctx *ctx}
 %{
   #include <stdio.h>
-  #include "eval.h"
+  #include "../eval/eval.h"
   #include "../util.h"
   int yylex (void);
 

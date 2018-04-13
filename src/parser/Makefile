@@ -1,4 +1,4 @@
-OBJECTS = parser.o lex.o ast.o eval.o str.o
+OBJECTS = parser.o lex.o ast.o str.o
 DEBUG=-g -ggdb
 
 all: lexer $(OBJECTS)
