@@ -3,8 +3,7 @@ const y := 99
 const int x = 98
 
 int b = y
-/*
+
 func main(int argc, string[] argv) int {
 	return 0;
 }
-*/

@@ -12,7 +12,7 @@
 DIGIT			[0-9]
 IDENTIFIER		[[:alpha:]_][[:alnum:]_]*
 
-SINGLE_TOKEN	[\(\)=,]
+SINGLE_TOKEN	[\(\)\{\}\[\]=,]
 
 %%
 	lex_str str;
@@ -59,7 +59,11 @@ SINGLE_TOKEN	[\(\)=,]
 
 "string"					{ yylval.i = AT_STRING; return TOK_TYPENAME; }
 
+"[]"						{ return TOK_ARRAY; }
 
+"..."						{ return TOK_VARARGS; }
+"func"						{ return KEYWORD_FUNC; }
+"return"					{ return KEYWORD_RETURN; }
 
 {SINGLE_TOKEN}				{ return yytext[0]; }
 

@@ -1,4 +1,4 @@
-OBJECTS = eval.o
+OBJECTS = eval.o op_binary.o func.o
 DEBUG=-g -ggdb
 
 all: $(OBJECTS)

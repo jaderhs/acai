@@ -28,6 +28,12 @@ struct ast_op {
 	void *child[2]; // tree
 };
 
+struct ast_func {
+	void *identifier;
+	void *signature;
+	void *body;
+};
+
 typedef struct ast_tree {
 
 	int type;
@@ -40,6 +46,7 @@ typedef struct ast_tree {
 		struct ast_tree *child[2];
 		struct ast_vtype vt;
 		struct ast_op op;
+		struct ast_func func;
 	} v;
 
 	LLVMTypeRef llvm_type;
@@ -49,8 +56,8 @@ typedef struct ast_tree {
 
 } tree;
 
-tree *tree_new(int type);
-tree *tree_new_with_children(int type, tree *left, tree *right);
+tree *tree_new_empty(int type);
+tree *tree_new(int type, tree *left, tree *right);
 
 void tree_free(tree *node);
 
@@ -61,6 +68,8 @@ struct ast_list *tree_list_get_first(tree *parent);
 struct ast_list *tree_list_get_last(tree *parent);
 
 tree *tree_variable_type_new(int type, int is_array);
+
+tree *tree_func_new(tree *identifier, tree *signature, tree *body);
 
 tree *tree_op_new(int type, int op, int is_assignment, tree *left, tree *right);
 void tree_op_free(tree *parent);

@@ -72,6 +72,9 @@ LLVMValueRef llvm_value_zero_initializer(llvm_ctx *ctx, int type) {
 	return NULL;
 }
 
+
+
+
 void llvm_value_new_integer(llvm_ctx *ctx, int i, llvm_acai_value *val) {
 
 	val->acai_type = LLVMConstInt(LLVMInt64TypeInContext(ctx->ctx), AT_INTEGER, FALSE);

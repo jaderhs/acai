@@ -42,5 +42,4 @@ int llvm_acai_type_infer(tree *node) {
 	}
 
 	return -1;
-
 }

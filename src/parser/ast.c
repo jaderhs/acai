@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-tree *tree_new(int type) {
+tree *tree_new_empty(int type) {
 
 	tree *node = malloc(sizeof(tree));
 	memset(node, 0, sizeof(tree));
@@ -20,9 +20,9 @@ void tree_free(tree *node) {
 		free(node);
 }
 
-tree *tree_new_with_children(int type, tree *left, tree *right) {
+tree *tree_new(int type, tree *left, tree *right) {
 
-	tree *parent = tree_new(type);
+	tree *parent = tree_new_empty(type);
 	AST_CHILD_LEFT(parent) = left;
 	AST_CHILD_RIGHT(parent) = right;
 
@@ -31,7 +31,7 @@ tree *tree_new_with_children(int type, tree *left, tree *right) {
 
 tree *tree_list_new(int type, tree *child) {
 
-	tree *parent = tree_new(type);
+	tree *parent = tree_new_empty(type);
 	parent->v.list = malloc(sizeof(struct ast_list));
 
 	parent->v.list->next = NULL;
@@ -87,9 +87,7 @@ struct ast_list *tree_list_get_last(tree *parent) {
 
 tree *tree_variable_type_new(int type, int is_array) {
 
-	tree *parent = tree_new(type);
-
-	parent->type = TOK_TYPENAME;
+	tree *parent = tree_new_empty(TOK_TYPENAME);
 
 	parent->v.vt.vtype = type;
 	parent->v.vt.is_array = is_array;
@@ -97,9 +95,20 @@ tree *tree_variable_type_new(int type, int is_array) {
 	return parent;
 }
 
+tree *tree_func_new(tree *identifier, tree *signature, tree *body) {
+
+	tree *parent = tree_new_empty(DECL_FUNC);
+
+	parent->v.func.identifier = identifier;
+	parent->v.func.signature = signature;
+	parent->v.func.body = body;
+
+	return parent;
+}
+
 tree *tree_op_new(int type, int op, int is_assignment, tree *left, tree *right) {
 
-	tree *parent = tree_new(type);
+	tree *parent = tree_new_empty(type);
 
 	parent->v.op.op = op;
 	parent->v.op.is_assignment = is_assignment;

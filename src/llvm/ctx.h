@@ -11,6 +11,7 @@ typedef struct {
 	LLVMBuilderRef builder;
 
 	llvm_scope_identifier_list *scope;
+	llvm_identifier_list *global;
 
 } llvm_ctx;
 
