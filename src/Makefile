@@ -20,7 +20,7 @@ acai/acai.a:
 	$(MAKE) -C acai
 
 clean:
-	rm -f compiler repl
+	rm -f compiler repl a.out output.o
 	$(MAKE) -C llvm clean
 	$(MAKE) -C parser clean
 	$(MAKE) -C eval clean

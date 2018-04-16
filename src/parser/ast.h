@@ -51,6 +51,7 @@ typedef struct ast_tree {
 
 	LLVMTypeRef llvm_type;
 	LLVMValueRef llvm_value;
+	LLVMValueRef llvm_at;
 
 	unsigned int flags;
 

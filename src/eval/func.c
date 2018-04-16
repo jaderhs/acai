@@ -42,6 +42,8 @@ tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 	LLVMBasicBlockRef bblock = LLVMAppendBasicBlockInContext(ctx->ctx, node->llvm_value, "entrypoint");
 	LLVMPositionBuilderAtEnd(ctx->builder, bblock);
 
+	eval(ctx, node->v.func.body, hint);
+
 	LLVMBuildRetVoid(ctx->builder);
 	/* restore previous scope */
 
@@ -49,6 +51,17 @@ tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 	ctx->scope = llvm_scope_pop_free(ctx->scope);
 	ctx->builder = prev_builder;
+
+	return node;
+}
+
+tree *eval_func_return(llvm_ctx *ctx, tree *node, unsigned int hint) {
+
+	tree *values = AST_CHILD_LEFT(node);
+
+	if(values != NULL) {
+
+	}
 
 	return node;
 }

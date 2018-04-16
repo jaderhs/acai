@@ -24,6 +24,12 @@ enum acai_type {
 	AT_STRING
 };
 
+struct _acai_value_list {
+	void *value; //acai_value
+	struct _acai_value_list *next;
+	struct _acai_value_list *prev;
+};
+
 typedef struct {
 	unsigned long type; //acai_type
 	char pad[8];
@@ -47,6 +53,8 @@ typedef struct {
 		long double f80;
 
 		char *s;
+
+		struct _acai_value_list *list;
 	} v;
 } acai_value;
 

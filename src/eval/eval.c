@@ -15,6 +15,7 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 	switch(node->type) {
 
+		case LIT_NULL:
 		case LIT_FLOAT:
 		case LIT_INTEGER:
 		case LIT_STRING:
@@ -61,7 +62,7 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 				p->flags = hint;
 
 				if((hint & EVAL_HINT_DECL_VAR_CONST) == 0) {
-					p->llvm_value = llvm_decl_var(ctx, p);
+					llvm_decl_var(ctx, p);
 				}
 
 				p->llvm_type = type->llvm_type;
@@ -78,6 +79,12 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 			//return identifier list of typed_identifier
 			return AST_CHILD_RIGHT(node);
+
+		case KEYWORD_RETURN:
+			return eval_func_return(ctx, node, hint);
+
+		case BLOCK:
+			return eval(ctx, AST_CHILD_LEFT(node), hint);
 
 		case DECL_VAR:
 			return eval(ctx, AST_CHILD_LEFT(node), hint);

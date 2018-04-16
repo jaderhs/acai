@@ -5,7 +5,17 @@ const int x = 98
 int b = y
 
 func main(int argc, string[] argv) int {
+
+	string[] ss
+/*
+	int n = 97
+
+	print("hello 123");
 	return 0;
+	*/
 }
 
-string s = "OK"
+string s1 = null
+string s2 = "OK"
+
+main(0, null)

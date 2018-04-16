@@ -28,6 +28,8 @@ SINGLE_TOKEN	[\(\)\{\}\[\]=,]
 "true"						{ yylval.i = 1; return LIT_BOOLEAN; }
 "false"						{ yylval.i = 0; return LIT_BOOLEAN; }
 
+"null"						{ return LIT_NULL; }
+
 	/* operators */
 
 ":="						{ return TOK_OP_ASSIGNDECLARE; }
@@ -62,6 +64,7 @@ SINGLE_TOKEN	[\(\)\{\}\[\]=,]
 "[]"						{ return TOK_ARRAY; }
 
 "..."						{ return TOK_VARARGS; }
+
 "func"						{ return KEYWORD_FUNC; }
 "return"					{ return KEYWORD_RETURN; }
 

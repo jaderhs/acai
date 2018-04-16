@@ -28,6 +28,9 @@ LLVMTypeRef llvm_value_type(void) {
 
 void llvm_value_literal_new(llvm_ctx *ctx, tree *node) {
 
+	int i;
+	LLVMValueRef val[8];
+
 	switch(node->type) {
 
 		case LIT_INTEGER:
@@ -44,6 +47,15 @@ void llvm_value_literal_new(llvm_ctx *ctx, tree *node) {
 		case LIT_STRING:
 			node->llvm_type = LLVMArrayType(LLVMInt8TypeInContext(ctx->ctx), strlen(node->v.s) + 1);
 			node->llvm_value = LLVMConstStringInContext(ctx->ctx, node->v.s, strlen(node->v.s), FALSE);
+			break;
+
+		case LIT_NULL:
+
+			for(i = 0; i < 8; i++)
+				val[i] = LLVMConstInt(LLVMInt8TypeInContext(ctx->ctx), 0, FALSE);
+
+			node->llvm_type = LLVMArrayType(LLVMInt8TypeInContext(ctx->ctx), 0);
+			node->llvm_value = LLVMConstArray(LLVMInt8TypeInContext(ctx->ctx), val, 8);
 			break;
 
 		default:
