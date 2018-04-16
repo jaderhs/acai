@@ -14,7 +14,9 @@ typedef struct _llvm_scope_identifier_list {
 	
 } llvm_scope_identifier_list;
 
-llvm_scope_identifier_list *llvm_scope_identifier_list_prepend_new(llvm_scope_identifier_list *prev);
+llvm_scope_identifier_list *llvm_scope_push_new(llvm_scope_identifier_list *prev);
+llvm_scope_identifier_list *llvm_scope_pop_free(llvm_scope_identifier_list *curr);
+
 void llvm_scope_identifier_list_free(llvm_scope_identifier_list *list);
 
 llvm_identifier_list *llvm_identifier_list_prepend(llvm_identifier_list *prev, tree *identifier);

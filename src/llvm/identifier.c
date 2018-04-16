@@ -5,7 +5,7 @@
 #include "ctx.h"
 #include "../parser/parser.h"
 
-llvm_scope_identifier_list *llvm_scope_identifier_list_prepend_new(llvm_scope_identifier_list *prev) {
+llvm_scope_identifier_list *llvm_scope_push_new(llvm_scope_identifier_list *prev) {
 
 	llvm_scope_identifier_list *list = malloc(sizeof(llvm_scope_identifier_list));
 
@@ -14,6 +14,17 @@ llvm_scope_identifier_list *llvm_scope_identifier_list_prepend_new(llvm_scope_id
 
 	return list;
 }
+
+llvm_scope_identifier_list *llvm_scope_pop_free(llvm_scope_identifier_list *curr) {
+
+	llvm_scope_identifier_list *next = curr->next;
+	free(curr);
+
+	return next;
+}
+
+
+
 
 void llvm_scope_identifier_list_free(llvm_scope_identifier_list *list) {
 	free(list);

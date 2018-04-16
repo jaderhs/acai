@@ -11,7 +11,7 @@ void llvm_create_module(char *name, llvm_ctx *ctx) {
 	ctx->module = LLVMModuleCreateWithNameInContext(name, ctx->ctx);
 	ctx->builder = LLVMCreateBuilderInContext(ctx->ctx);
 
-	ctx->scope = llvm_scope_identifier_list_prepend_new(ctx->scope);
+	ctx->scope = llvm_scope_push_new(ctx->scope);
 }
 
 void llvm_init(llvm_ctx *ctx) {

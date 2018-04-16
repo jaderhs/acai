@@ -70,6 +70,18 @@ void tree_list_free(tree *parent) {
 	//tree_free(parent);
 }
 
+unsigned int tree_list_length(tree *parent) {
+
+	unsigned int i = 0;
+	struct ast_list *list;
+
+	for(list = parent->v.list; list != NULL; list = list->next) {
+		i++;
+	}
+
+	return i;
+}
+
 struct ast_list *tree_list_get_first(tree *parent) {
 
 	return parent->v.list;

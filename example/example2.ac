@@ -7,3 +7,5 @@ int b = y
 func main(int argc, string[] argv) int {
 	return 0;
 }
+
+string s = "OK"

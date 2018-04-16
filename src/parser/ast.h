@@ -64,8 +64,10 @@ void tree_free(tree *node);
 tree *tree_list_new(int type, tree *child);
 tree *tree_list_prepend(tree *parent, tree *child);
 void tree_list_free(tree *parent);
+unsigned int tree_list_length(tree *parent);
 struct ast_list *tree_list_get_first(tree *parent);
 struct ast_list *tree_list_get_last(tree *parent);
+
 
 tree *tree_variable_type_new(int type, int is_array);
 
