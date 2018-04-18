@@ -1,20 +1,33 @@
+#define AST_ACAI_VALUE(node)	((llvm_acai_value*)node->av)
+#define AST_VALUE_LITERAL(node)	((llvm_value_literal*)node->lvl)
+
+#define IS_LITERAL(n) (n->type == LIT_INTEGER || n->type == LIT_FLOAT)
+
 typedef struct {
 
-	LLVMValueRef acai_type;
+	LLVMValueRef begin;
+	LLVMValueRef type;
+	LLVMValueRef flags;
+	LLVMValueRef value;
 
-	LLVMTypeRef type;
-	LLVMValueRef val;
+	LLVMTypeRef llvm_type;
 
 } llvm_acai_value;
 
+typedef struct {
+
+	int acai_type;
+
+	LLVMTypeRef type;
+	LLVMValueRef value;
+
+} llvm_value_literal;
 
 void llvm_value_init(llvm_ctx *ctx);
 LLVMTypeRef llvm_value_type(void);
 
-void llvm_value_literal_new(llvm_ctx *ctx, tree *node);
-LLVMValueRef llvm_value_zero_initializer(llvm_ctx *ctx, int type);
+llvm_acai_value *llvm_acai_value_alloca(llvm_ctx *ctx, char *llvm_identifier);
+llvm_acai_value *llvm_acai_value_alloca_with_type(llvm_ctx *ctx, char *llvm_identifier, int av_type);
 
-void llvm_value_new_integer(llvm_ctx *ctx, int i, llvm_acai_value *val);
-void llvm_value_new_float(llvm_ctx *ctx, double f, llvm_acai_value *val);
-void llvm_value_new_string(llvm_ctx *ctx, char *str, llvm_acai_value *val);
-void llvm_value_new_identifier(llvm_ctx *ctx, tree *identifier, llvm_acai_value *val);
+llvm_value_literal *llvm_value_literal_new(llvm_ctx *ctx, tree *node);
+llvm_value_literal *llvm_value_zero_initializer(llvm_ctx *ctx, int av_type);

@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "../parser/ast.h"
+#include "parser/ast.h"
 #include "ctx.h"
-#include "../parser/parser.h"
+#include "parser/parser.h"
 
 llvm_scope_identifier_list *llvm_scope_push_new(llvm_scope_identifier_list *prev) {
 

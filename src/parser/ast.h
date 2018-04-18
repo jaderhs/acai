@@ -32,6 +32,8 @@ struct ast_func {
 	void *identifier;
 	void *signature;
 	void *body;
+
+	LLVMValueRef llvm_func;
 };
 
 typedef struct ast_tree {
@@ -49,9 +51,9 @@ typedef struct ast_tree {
 		struct ast_func func;
 	} v;
 
-	LLVMTypeRef llvm_type;
-	LLVMValueRef llvm_value;
-	LLVMValueRef llvm_at;
+	void *av;				//a struct llvm_acai_value pointer holding parameters/function declaration values
+	void *lvl;				//a struct llvm_literal_value for rvalue's
+	LLVMTypeRef llvm_type;	//a TYPED_IDENTIFIER llvm_type
 
 	unsigned int flags;
 

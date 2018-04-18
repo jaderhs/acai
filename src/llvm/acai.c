@@ -1,7 +1,7 @@
-#include "../parser/ast.h"
+#include "parser/ast.h"
 #include "ctx.h"
 #include "value.h"
-#include "../util.h"
+#include "util.h"
 #include <llvm-c/Core.h>
 
 LLVMValueRef _acai_func_call;

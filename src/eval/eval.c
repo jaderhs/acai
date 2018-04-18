@@ -6,8 +6,6 @@
 #include "../llvm/value.h"
 #include "../llvm/llvm.h"
 
-#define IS_LITERAL(n) (n->type == LIT_INTEGER || n->type == LIT_FLOAT)
-
 tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 	tree *p, *type;
@@ -19,7 +17,7 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 		case LIT_FLOAT:
 		case LIT_INTEGER:
 		case LIT_STRING:
-			llvm_value_literal_new(ctx, node);
+			node->lvl = llvm_value_literal_new(ctx, node);
 			return node;
 
 		case TOK_IDENTIFIER:
@@ -72,8 +70,8 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 				l->node = p;
 
 				if((hint & (EVAL_HINT_DECL_VAR_CONST|EVAL_HINT_DECL_VAR_DONT_INITIALIZE)) == 0) {
-					LLVMValueRef val = llvm_value_zero_initializer(ctx, type->v.i);
-					LLVMBuildStore(ctx->builder, val, p->llvm_value);
+					llvm_value_literal *val = llvm_value_zero_initializer(ctx, type->v.i);
+					LLVMBuildStore(ctx->builder, val->value, AST_ACAI_VALUE(p)->value);
 				}
 			}
 

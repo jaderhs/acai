@@ -24,6 +24,11 @@ enum acai_type {
 	AT_STRING
 };
 
+enum acai_type_flags {
+	ATF_NULL = 1 >> 0,
+	ATF_ZERO = 1 >> 1,
+};
+
 struct _acai_value_list {
 	void *value; //acai_value
 	struct _acai_value_list *next;
@@ -32,7 +37,7 @@ struct _acai_value_list {
 
 typedef struct {
 	unsigned long type; //acai_type
-	char pad[8];
+	unsigned long flags;
 	union {
 		int b;
 

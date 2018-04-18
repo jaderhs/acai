@@ -5,17 +5,17 @@
 #include "../llvm/value.h"
 #include "../llvm/llvm.h"
 
-#define IS_LITERAL(n) (n->type == LIT_INTEGER || n->type == LIT_FLOAT)
-
 tree *eval_op_binary(llvm_ctx *ctx, int op, tree *left, tree *right, unsigned int hint) {
 
-	tree *node1, *node2, *p;
+	tree *node_lvalue, *node_rvalue, *p;
 	struct ast_list *iter_left, *iter_right;
+	LLVMValueRef ptr;
 
 	switch(op) {
 
 		case '=':
 		case TOK_OP_ASSIGNDECLARE:
+
 			left = eval(ctx, left, hint | EVAL_HINT_DECL_VAR_DONT_INITIALIZE);
 
 			if(left->type != LIST_IDENTIFIER) {
@@ -27,67 +27,72 @@ tree *eval_op_binary(llvm_ctx *ctx, int op, tree *left, tree *right, unsigned in
 
 			if(IS_LITERAL(right)) {
 
-				LLVMBuildStore(ctx->builder, AST_LIST_NODE(tree_list_get_first(right))->llvm_value, left->llvm_value);
+				ptr = LLVMBuildBitCast(ctx->builder, AST_ACAI_VALUE(left)->value, LLVMPointerType(AST_VALUE_LITERAL(AST_LIST_NODE(tree_list_get_first(right)))->type, 0), "");
+
+				LLVMBuildStore(ctx->builder, AST_LIST_NODE(tree_list_get_first(right))->lvl, ptr);
 			}
 			else if (right->type == LIST_EXPRESSION) {
 
-				LLVMValueRef val;
+				llvm_value_literal *val;
 
 				iter_right = tree_list_get_last(right);
 
 				AST_LIST_FOREACH(left, iter_left) {
 
-					node1 = AST_LIST_NODE(iter_left);
+					node_lvalue = AST_LIST_NODE(iter_left);
 
 					if(iter_right) {
 
-						node2 = AST_LIST_NODE(iter_right);
+						node_rvalue = AST_LIST_NODE(iter_right);
 
-						if(node2->flags & EVAL_HINT_DECL_VAR_CONST) {
+						if(node_rvalue->flags & EVAL_HINT_DECL_VAR_CONST) {
 
-							//node2=DECL_CONT TYPED_IDENTIFIER
-							val = AST_CHILD_RIGHT(node2)->llvm_value;
-
+							//node_rvalue=DECL_CONST TYPED_IDENTIFIER
+							val = AST_CHILD_RIGHT(node_rvalue)->lvl;
 						} else {
-							val = node2->llvm_value;
+
+							val = node_rvalue->lvl;
 						}
 
 						iter_right = iter_right->prev;
 
 					} else {
 
-						val = llvm_value_zero_initializer(ctx, AST_CHILD_LEFT(node1)->v.i);
+						val = llvm_value_zero_initializer(ctx, AST_CHILD_LEFT(node_lvalue)->v.i);
 					}
 
-					if(op == TOK_OP_ASSIGNDECLARE && node1->type == TOK_IDENTIFIER) {
+					if(op == TOK_OP_ASSIGNDECLARE && node_lvalue->type == TOK_IDENTIFIER) {
 
-						//node1 = tok_identifier
-						//node2 = value
+						//node_lvalue = tok_identifier
+						//node_rvalue = value
 
 						//build llvm value from the same type as val
-						p = tree_new(TYPED_IDENTIFIER, tree_variable_type_new(llvm_acai_type_infer(node2), FALSE), node1);
+						p = tree_new(TYPED_IDENTIFIER, tree_variable_type_new(llvm_acai_type_infer(node_rvalue), FALSE), node_lvalue);
 						p->flags = hint;
 
-						AST_CHILD_LEFT(p)->llvm_type = node2->llvm_type;
+						AST_CHILD_LEFT(p)->llvm_type = node_rvalue->llvm_type;
 
 						if((hint & EVAL_HINT_DECL_VAR_CONST) != 0) {
-							llvm_value_literal_new(ctx, node2);
+							node_rvalue->lvl = llvm_value_literal_new(ctx, node_rvalue);
 
 							//copy value into identifier for constant
-							AST_CHILD_RIGHT(p)->llvm_value = node2->llvm_value;
+							AST_CHILD_RIGHT(p)->lvl = node_rvalue->lvl;
 						}
 						else {
-							p->llvm_value = llvm_decl_var_assigndeclare(ctx, node1, node2);
+
+							llvm_decl_var_assigndeclare(ctx, node_lvalue, p);
 						}
 
-						p->llvm_type = node2->llvm_type;
+//						p->llvm_type = node_rvalue->llvm_type;
 
 						ctx->scope->identifiers = llvm_identifier_list_prepend(ctx->scope->identifiers, p);
-						node1 = p;
+						node_lvalue = p;
 					}
 
 					if((hint & (EVAL_HINT_DECL_VAR_CONST|EVAL_HINT_DECL_VAR_DONT_INITIALIZE)) == 0) {
-						LLVMBuildStore(ctx->builder, val, node1->llvm_value);
+
+						ptr = LLVMBuildBitCast(ctx->builder, AST_ACAI_VALUE(node_lvalue)->value, LLVMPointerType(val->type, 0), "");
+						LLVMBuildStore(ctx->builder, val->value, ptr);
 					}
 				}
 

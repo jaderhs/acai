@@ -1,57 +1,75 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
-#include "../parser/ast.h"
+#include "parser/ast.h"
 #include "ctx.h"
 #include "acai.h"
 #include "value.h"
-#include "../util.h"
-#include "../parser/parser.h"
+#include "util.h"
+#include "parser/parser.h"
 
-int llvm_argument(llvm_ctx *ctx, tree *node, llvm_acai_value *val) {
+void llvm_argument_store(llvm_ctx *ctx, tree *node, llvm_value_literal *lvl) {
 
-	tree *p;
+	LLVMValueRef llvm_str;
 
-	switch(node->type) {
-
-		case LIT_INTEGER:
-			llvm_value_new_integer(ctx, node->v.i, val);
-			return TRUE;
-
-		case LIT_FLOAT:
-			llvm_value_new_float(ctx, node->v.f, val);
-			return TRUE;
-
-		case LIT_STRING:
-			llvm_value_new_string(ctx, node->v.s, val);
-			return TRUE;
-
-		case TOK_IDENTIFIER:
-			p = llvm_identifier_list_lookup_by_name(ctx->scope->identifiers, node->v.s);
-			if(p == NULL) {
-				printf("Error fetching identifier %s\n", node->v.s);
-				return FALSE;
-			}
-
-			llvm_value_new_identifier(ctx, p, val);
-			return TRUE;
+	/* store string */
+	if(node->type == LIT_STRING) {
+		llvm_str = LLVMBuildAlloca(ctx->builder, LLVMArrayType(LLVMInt8Type(), strlen(node->v.s)+1), "");
+		LLVMBuildStore(ctx->builder, lvl->value, llvm_str);
 	}
 
-	printf("Unknown llvm node arg=%p type=%d\n", node, node->type);
+	/* cast acai.value to argument type */
+	LLVMValueRef val_cast = LLVMBuildBitCast(ctx->builder, AST_ACAI_VALUE(node)->value, LLVMPointerType(lvl->type, 0), "");
 
-	return FALSE;
+	if(node->type == LIT_STRING) {
+		LLVMBuildStore(ctx->builder, llvm_str, val_cast);
+	}
+	else {
+		LLVMBuildStore(ctx->builder, lvl->value, val_cast);
+	}
+
+}
+
+int llvm_argument(llvm_ctx *ctx, tree *node) {
+
+	tree *identifier;
+	llvm_acai_value acai_value;
+	llvm_value_literal *lvl;
+
+	if(node->type == TOK_IDENTIFIER) {
+
+		identifier = llvm_identifier_list_lookup_by_name(ctx->scope->identifiers, node->v.s);
+		if(identifier == NULL) {
+			fprintf(stderr, "Identifier '%s' not found\n", node->v.s);
+			return FALSE;
+		}
+
+		node->av = identifier->av;
+		//llvm_value_new_identifier(ctx, p, &acai_value);
+		//return TRUE;
+	}
+	else if((lvl = llvm_value_literal_new(ctx, node)) != NULL) {
+
+		node->av = llvm_acai_value_alloca_with_type(ctx, "", lvl->acai_type);
+		llvm_argument_store(ctx, node, lvl);
+	}
+	else {
+
+		printf("Unknown llvm node arg=%p type=%d\n", node, node->type);
+		return FALSE;
+	}
+	return TRUE;
 }
 
 void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 	int i, j;
 	char *str;
-	tree *right;
+	tree *right, *rvalue;
 	struct ast_list *l;
 	LLVMValueRef func;
 	LLVMValueRef args[3];
 
-	llvm_acai_value acai_value;
 	LLVMValueRef valstr, off, atp, argv_array, *argv, arg;
 	unsigned int argc, argcap;
 
@@ -59,7 +77,12 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 	if(node->type == TOK_IDENTIFIER) {
 
-		func = LLVMGetNamedFunction(ctx->module, node->v.s);
+		str = malloc(strlen(node->v.s) + 16);
+		sprintf(str, "_acai_func_%s", node->v.s);
+
+		func = LLVMGetNamedFunction(ctx->module, str);
+		if(func == NULL)
+			func = LLVMGetNamedFunction(ctx->module, node->v.s);
 
 		i = 0;
 		if(func == NULL) {
@@ -81,41 +104,13 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 			AST_LIST_FOREACH(right, l) {
 
-				if(llvm_argument(ctx, AST_LIST_NODE(l), &acai_value) == FALSE) {
+				rvalue = AST_LIST_NODE(l);
+
+				if(llvm_argument(ctx, rvalue) == FALSE) {
 					return;
 				}
 
-				/* alloc acai_type{} */
-				arg = LLVMBuildAlloca(ctx->builder, llvm_value_type(), "");
-
-				LLVMSetAlignment(arg, 32);
-
-				/* Set acai_type.type */
-				atp = LLVMBuildStructGEP(ctx->builder, arg, 0, "");
-				LLVMBuildStore(ctx->builder, acai_value.acai_type, atp);
-
-				/* store string */
-				if(AST_LIST_NODE(l)->type == LIT_STRING) {
-					valstr = LLVMBuildAlloca(ctx->builder, LLVMArrayType(LLVMInt8Type(), strlen(AST_LIST_NODE(l)->v.s)+1), "");
-					LLVMBuildStore(ctx->builder, acai_value.val, valstr);
-				}
-
-				/* Set acai_type.v */
-
-				/* Get pointer for acai_type.v */
-				off = LLVMBuildStructGEP(ctx->builder, arg, 2, "");
-
-				/* cast v to argument type */
-				atp = LLVMBuildBitCast(ctx->builder, off, LLVMPointerType(acai_value.type, 0), "");
-
-				if(AST_LIST_NODE(l)->type == LIT_STRING) {
-					LLVMBuildStore(ctx->builder, valstr, atp);
-				}
-				else {
-					LLVMBuildStore(ctx->builder, acai_value.val, atp);
-				}
-
-				argv[argc] = arg;
+				argv[argc] = AST_ACAI_VALUE(rvalue)->begin;
 
 				argc++;
 				if(argc == argcap) {

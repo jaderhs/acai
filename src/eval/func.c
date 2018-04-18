@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "eval.h"
+#include "../llvm/value.h"
 #include "../parser/parser.h"
 #include "../util.h"
 
@@ -12,8 +13,8 @@ tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 	LLVMBuilderRef prev_builder;
 
 	LLVMTypeRef params[2];
-	params[0] = LLVMInt32Type();
-	params[1] = LLVMArrayType(LLVMPointerType(LLVMInt8Type(), 0), 0);
+	params[0] = LLVMInt64Type();
+	params[1] = LLVMPointerType(LLVMArrayType(llvm_value_type(), 0), 0);
 
 	LLVMAttributeRef attr = LLVMCreateEnumAttribute(ctx->ctx, LLVMGetEnumAttributeKindForName("alignstack", 10), 16);
 
@@ -29,20 +30,24 @@ tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 	str = malloc(32 + strlen(AST_LIST_NODE(list)->v.s));
 	sprintf(str, "_acai_func_%s", AST_LIST_NODE(list)->v.s);
 
-	node->llvm_value = LLVMAddFunction(ctx->module, str, func_spec);
-	LLVMAddAttributeAtIndex(node->llvm_value, 0, attr);
+	node->v.func.llvm_func = LLVMAddFunction(ctx->module, str, func_spec);
+	LLVMAddAttributeAtIndex(node->v.func.llvm_func, 0, attr);
 
 	/* create new scope */
-
 	prev_builder = ctx->builder;
 
 	ctx->scope = llvm_scope_push_new(ctx->scope);
 	ctx->builder = LLVMCreateBuilderInContext(ctx->ctx);
 
-	LLVMBasicBlockRef bblock = LLVMAppendBasicBlockInContext(ctx->ctx, node->llvm_value, "entrypoint");
+	LLVMBasicBlockRef bblock = LLVMAppendBasicBlockInContext(ctx->ctx, node->v.func.llvm_func, "entrypoint");
 	LLVMPositionBuilderAtEnd(ctx->builder, bblock);
 
+	/* TODO: Insert function paramters into scope */
+
+
 	eval(ctx, node->v.func.body, hint);
+
+	/* TODO: standardize a list of acai_value for return */
 
 	LLVMBuildRetVoid(ctx->builder);
 	/* restore previous scope */
