@@ -50,7 +50,7 @@ int llvm_argument(llvm_ctx *ctx, tree *node) {
 	}
 	else if((lvl = llvm_value_literal_new(ctx, node)) != NULL) {
 
-		node->av = llvm_acai_value_alloca_with_type(ctx, "", lvl->acai_type);
+		node->av = llvm_acai_value_new_alloca_with_type(ctx, "", lvl->acai_type);
 		llvm_argument_store(ctx, node, lvl);
 	}
 	else {
@@ -79,6 +79,8 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 		str = malloc(strlen(node->v.s) + 16);
 		sprintf(str, "_acai_func_%s", node->v.s);
+
+		/* TOOD: lookup function identifier in global scope and get default argument values */
 
 		func = LLVMGetNamedFunction(ctx->module, str);
 		if(func == NULL)
@@ -122,6 +124,8 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 		}
 
+		if(argc < //num of args in func, load default value for rargs)
+
 		argv[argc] = LLVMConstPointerNull(LLVMPointerType(llvm_value_type(), 0));
 
 		str = malloc(24 + strlen(node->v.s));
@@ -149,7 +153,7 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 		}
 
 		atp = LLVMConstInt(LLVMInt64Type(), 0, FALSE);
-		args[i++] = LLVMBuildGEP(ctx->builder, argv_array, &atp, 1, "");
+		args[i++] = LLVMBuildBitCast(ctx->builder, argv_array, LLVMPointerType(LLVMPointerType(llvm_value_type(), 0), 0), "");
 
 		str = malloc(16 + strlen(node->v.s));
 		sprintf(str, "func-call-%s", node->v.s);

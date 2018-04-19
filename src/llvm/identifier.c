@@ -23,9 +23,6 @@ llvm_scope_identifier_list *llvm_scope_pop_free(llvm_scope_identifier_list *curr
 	return next;
 }
 
-
-
-
 void llvm_scope_identifier_list_free(llvm_scope_identifier_list *list) {
 	free(list);
 }

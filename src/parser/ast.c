@@ -20,6 +20,14 @@ void tree_free(tree *node) {
 		free(node);
 }
 
+tree *tree_copy(tree *src) {
+
+	tree *dst = tree_new_empty(src->type);
+	memcpy(dst, src, sizeof(tree));
+
+	return dst;
+}
+
 tree *tree_new(int type, tree *left, tree *right) {
 
 	tree *parent = tree_new_empty(type);

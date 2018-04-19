@@ -41,7 +41,7 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 			p = NULL;
 			AST_LIST_FOREACH(node, l) {
 
-				l->node = eval(ctx, l->node, hint);
+				l->node = eval(ctx, AST_LIST_NODE(l), hint);
 			}
 			return node;
 
@@ -50,6 +50,7 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 		case LIST_TYPED_IDENTIFIER:
 
+			/* Convert to a LIST_IDENTIFIER of TYPED_IDENTIFIERS */
 			type = eval(ctx, AST_CHILD_LEFT(node), hint);
 
 			//right node is identifier list
@@ -70,6 +71,7 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 				l->node = p;
 
 				if((hint & (EVAL_HINT_DECL_VAR_CONST|EVAL_HINT_DECL_VAR_DONT_INITIALIZE)) == 0) {
+
 					llvm_value_literal *val = llvm_value_zero_initializer(ctx, type->v.i);
 					LLVMBuildStore(ctx->builder, val->value, AST_ACAI_VALUE(p)->value);
 				}
@@ -86,6 +88,14 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 		case DECL_VAR:
 			return eval(ctx, AST_CHILD_LEFT(node), hint);
+
+		case DECL_PARAM:
+			p = AST_CHILD_RIGHT(node);
+
+			if(p != NULL)
+				AST_CHILD_RIGHT(node) = eval(ctx, p, hint);
+
+			return node;
 
 		case DECL_CONST:
 			return eval(ctx, AST_CHILD_LEFT(node), hint | EVAL_HINT_DECL_VAR_CONST);

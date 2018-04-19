@@ -61,6 +61,7 @@ typedef struct ast_tree {
 
 tree *tree_new_empty(int type);
 tree *tree_new(int type, tree *left, tree *right);
+tree *tree_copy(tree *src);
 
 void tree_free(tree *node);
 

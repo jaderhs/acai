@@ -35,7 +35,7 @@ yyerror (llvm_ctx *ctx, char const *s)
 %token TOK_OP_ASSIGNDECLARE TOK_VARARGS TOK_ARRAY
 %token OP_UNARY OP_BINARY
 
-%token DECL_VAR DECL_CONST DECL_FUNC FUNC_SIG FUNC_CALL BLOCK
+%token DECL_VAR DECL_CONST DECL_PARAM DECL_FUNC FUNC_SIG FUNC_CALL BLOCK
 %token KEYWORD_IMPORT KEYWORD_AS KEYWORD_CONST KEYWORD_FUNC KEYWORD_RETURN
 %token LIST_PARAMETER FUNC_RETURN_PARAMETER_LIST FUNC_RETURN_PARAM_TYPE DECL_RETURN
 %token LIST_STATEMENT LIST_IDENTIFIER LIST_EXPRESSION LIST_TYPED_IDENTIFIER LIST_IDENTIFIER_DOTTED
@@ -123,8 +123,8 @@ parameter_list:
 ;
 
 parameter:
-	typed_identifier					{ $$ = tree_new(DECL_VAR, $1, NULL); }
-|	typed_identifier '=' expression		{ $$ = tree_new(DECL_VAR, tree_op_new(OP_BINARY, '=', TRUE, $1, $3), NULL); }
+	typed_identifier					{ $$ = tree_new(DECL_PARAM, $1, NULL); }
+|	typed_identifier '=' expression		{ $$ = tree_new(DECL_PARAM, $1, $3); }
 |	TOK_VARARGS							{ $$ = tree_new_empty(TOK_VARARGS); }
 ;
 

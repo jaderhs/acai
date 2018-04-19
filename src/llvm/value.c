@@ -26,9 +26,14 @@ LLVMTypeRef llvm_value_type(void) {
 	return llvm_value_struct;
 }
 
-llvm_acai_value *llvm_acai_value_alloca(llvm_ctx *ctx, char *llvm_identifier) {
+llvm_acai_value *llvm_acai_value_new() {
 
-	llvm_acai_value *av = malloc(sizeof(llvm_acai_value));
+	return malloc(sizeof(llvm_acai_value));
+}
+
+llvm_acai_value *llvm_acai_value_new_alloca(llvm_ctx *ctx, char *llvm_identifier) {
+
+	llvm_acai_value *av = llvm_acai_value_new();
 
 	/* alloc acai_type{} */
 	av->begin = LLVMBuildAlloca(ctx->builder, llvm_value_type(), llvm_identifier);
@@ -43,13 +48,27 @@ llvm_acai_value *llvm_acai_value_alloca(llvm_ctx *ctx, char *llvm_identifier) {
 	return av;
 }
 
-llvm_acai_value *llvm_acai_value_alloca_with_type(llvm_ctx *ctx, char *llvm_identifier, int av_type) {
+llvm_acai_value *llvm_acai_value_new_alloca_with_type(llvm_ctx *ctx, char *llvm_identifier, int av_type) {
 
-	llvm_acai_value *av = llvm_acai_value_alloca(ctx, llvm_identifier);
+	llvm_acai_value *av = llvm_acai_value_new_alloca(ctx, llvm_identifier);
 
 	/* Set acai_type.type */
 	LLVMBuildStore(ctx->builder, LLVMConstInt(LLVMInt64TypeInContext(ctx->ctx), av_type, FALSE), av->type);
 	return av;
+}
+
+void llvm_acai_value_copy(llvm_ctx *ctx, llvm_acai_value *src, llvm_acai_value *dst) {
+
+	LLVMValueRef val = LLVMBuildLoad(ctx->builder, src->type, "");
+	LLVMBuildStore(ctx->builder, val, dst->type);
+
+	val = LLVMBuildLoad(ctx->builder, src->flags, "");
+	LLVMBuildStore(ctx->builder, val, dst->flags);
+
+	val = LLVMBuildLoad(ctx->builder, src->value, "");
+	LLVMBuildStore(ctx->builder, val, dst->value);
+
+	/* TODO: handle strings (are strings cow)? */
 }
 
 llvm_value_literal *llvm_value_literal_new(llvm_ctx *ctx, tree *node) {
@@ -132,3 +151,4 @@ llvm_value_literal *llvm_value_zero_initializer(llvm_ctx *ctx, int av_type) {
 
 	return lvl;
 }
+

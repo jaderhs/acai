@@ -8,13 +8,16 @@
 
 tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
+	int i;
 	char *str;
+	tree *arg, *list_parameters, *identifier;
 	struct ast_list *list;
 	LLVMBuilderRef prev_builder;
+	LLVMValueRef argv, argp, idx[1];
 
 	LLVMTypeRef params[2];
 	params[0] = LLVMInt64Type();
-	params[1] = LLVMPointerType(LLVMArrayType(llvm_value_type(), 0), 0);
+	params[1] = LLVMPointerType(LLVMPointerType(llvm_value_type(), 0), 0);
 
 	LLVMAttributeRef attr = LLVMCreateEnumAttribute(ctx->ctx, LLVMGetEnumAttributeKindForName("alignstack", 10), 16);
 
@@ -42,8 +45,40 @@ tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 	LLVMBasicBlockRef bblock = LLVMAppendBasicBlockInContext(ctx->ctx, node->v.func.llvm_func, "entrypoint");
 	LLVMPositionBuilderAtEnd(ctx->builder, bblock);
 
-	/* TODO: Insert function paramters into scope */
+	/* Insert function parameters into scope */
+	list_parameters = AST_CHILD_LEFT(((tree*) node->v.func.signature));
 
+	argv = LLVMGetParam(node->v.func.llvm_func, 1);
+
+	i = 0;
+	AST_LIST_FOREACH(list_parameters, list) {
+
+		arg = AST_LIST_NODE(list);
+
+		if(arg->type == DECL_PARAM) {
+
+			idx[0] = LLVMConstInt(LLVMInt64Type(), i, FALSE);
+			argp = LLVMBuildGEP(ctx->builder, argv, idx, 1, "");
+			argp = LLVMBuildLoad(ctx->builder, argp, "");
+
+			identifier = tree_copy(AST_CHILD_LEFT(arg));
+
+			identifier->av = llvm_acai_value_new();
+
+			AST_ACAI_VALUE(identifier)->begin = argp;
+			AST_ACAI_VALUE(identifier)->type = LLVMBuildStructGEP(ctx->builder, argp, 0, "");
+			AST_ACAI_VALUE(identifier)->flags = LLVMBuildStructGEP(ctx->builder, argp, 1, "");
+			AST_ACAI_VALUE(identifier)->value = LLVMBuildStructGEP(ctx->builder, argp, 2, "");
+
+			/* TODO: handle default value, typed identifier list */
+
+			ctx->scope->identifiers = llvm_identifier_list_prepend(ctx->scope->identifiers, identifier);
+
+			i++;
+		}
+		/* TODO: handle arg->type == TOK_VARARGS*/
+
+	}
 
 	eval(ctx, node->v.func.body, hint);
 

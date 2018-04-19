@@ -1,5 +1,7 @@
 #include <llvm-c/Core.h>
 
+/* TODO: implement global scope and stacked children scope + function identifier map */
+
 typedef struct _llvm_identifier_list {
 
 	tree *identifier;
