@@ -8,7 +8,6 @@
 #include <dirent.h>
 #include <llvm-c/Target.h>
 #include <llvm-c/TargetMachine.h>
-#include "parser/ast.h"
 #include "llvm/ctx.h"
 #include "llvm/init.h"
 #include "llvm/acai.h"

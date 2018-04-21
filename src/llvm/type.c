@@ -1,9 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "../parser/ast.h"
 #include "ctx.h"
-#include "../parser/parser.h"
-#include "../acai/type.h"
+#include "parser/parser.h"
+#include "acai/type.h"
 
 tree *llvm_type_new(llvm_ctx *ctx, tree *node) {
 

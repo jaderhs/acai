@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
-#include "parser/ast.h"
 #include "ctx.h"
 #include "acai.h"
 #include "value.h"
@@ -19,7 +18,7 @@ void llvm_argument_store(llvm_ctx *ctx, tree *node, llvm_value_literal *lvl) {
 	}
 
 	/* cast acai.value to argument type */
-	LLVMValueRef val_cast = LLVMBuildBitCast(ctx->builder, AST_ACAI_VALUE(node)->value, LLVMPointerType(lvl->type, 0), "");
+	LLVMValueRef val_cast = LLVMBuildBitCast(ctx->builder, llvm_acai_value_get_value(ctx, AST_ACAI_VALUE(node)), LLVMPointerType(lvl->type, 0), "");
 
 	if(node->type == LIT_STRING) {
 		LLVMBuildStore(ctx->builder, llvm_str, val_cast);
@@ -32,13 +31,18 @@ void llvm_argument_store(llvm_ctx *ctx, tree *node, llvm_value_literal *lvl) {
 
 int llvm_argument(llvm_ctx *ctx, tree *node) {
 
-	tree *identifier;
+	tree *identifier = NULL;
 	llvm_acai_value acai_value;
 	llvm_value_literal *lvl;
 
 	if(node->type == TOK_IDENTIFIER) {
 
-		identifier = llvm_identifier_list_lookup_by_name(ctx->scope->identifiers, node->v.s);
+		if(ctx->scope.local != NULL)
+			identifier = llvm_identifier_list_lookup_by_name(ctx->scope.local->identifiers, node->v.s);
+
+		if(identifier == NULL)
+			identifier = llvm_identifier_list_lookup_by_name(ctx->scope.global->identifiers, node->v.s);
+
 		if(identifier == NULL) {
 			fprintf(stderr, "Identifier '%s' not found\n", node->v.s);
 			return FALSE;
@@ -124,7 +128,7 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 		}
 
-		if(argc < //num of args in func, load default value for rargs)
+		//if(argc < //num of args in func, load default value for rargs)
 
 		argv[argc] = LLVMConstPointerNull(LLVMPointerType(llvm_value_type(), 0));
 

@@ -1,5 +1,4 @@
-#include "ast.h"
-#include "../llvm/ctx.h"
+#include "llvm/ctx.h"
 #include "parser.h"
 #include <stdlib.h>
 #include <string.h>

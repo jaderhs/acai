@@ -30,6 +30,10 @@ llvm_acai_value *llvm_acai_value_new();
 llvm_acai_value *llvm_acai_value_new_alloca(llvm_ctx *ctx, char *llvm_identifier);
 llvm_acai_value *llvm_acai_value_new_alloca_with_type(llvm_ctx *ctx, char *llvm_identifier, int av_type);
 
+LLVMValueRef llvm_acai_value_get_type(llvm_ctx *ctx, llvm_acai_value *lav);
+LLVMValueRef llvm_acai_value_get_flags(llvm_ctx *ctx, llvm_acai_value *lav);
+LLVMValueRef llvm_acai_value_get_value(llvm_ctx *ctx, llvm_acai_value *lav);
+
 void llvm_acai_value_copy(llvm_ctx *ctx, llvm_acai_value *src, llvm_acai_value *dst);
 
 llvm_value_literal *llvm_value_literal_new(llvm_ctx *ctx, tree *node);

@@ -39,7 +39,7 @@ tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 	/* create new scope */
 	prev_builder = ctx->builder;
 
-	ctx->scope = llvm_scope_push_new(ctx->scope);
+	ctx->scope.local = llvm_scope_push_new(ctx->scope.local);
 	ctx->builder = LLVMCreateBuilderInContext(ctx->ctx);
 
 	LLVMBasicBlockRef bblock = LLVMAppendBasicBlockInContext(ctx->ctx, node->v.func.llvm_func, "entrypoint");
@@ -66,14 +66,9 @@ tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 			identifier->av = llvm_acai_value_new();
 
 			AST_ACAI_VALUE(identifier)->begin = argp;
-			AST_ACAI_VALUE(identifier)->type = LLVMBuildStructGEP(ctx->builder, argp, 0, "");
-			AST_ACAI_VALUE(identifier)->flags = LLVMBuildStructGEP(ctx->builder, argp, 1, "");
-			AST_ACAI_VALUE(identifier)->value = LLVMBuildStructGEP(ctx->builder, argp, 2, "");
-
 			/* TODO: handle default value, typed identifier list */
 
-			ctx->scope->identifiers = llvm_identifier_list_prepend(ctx->scope->identifiers, identifier);
-
+			ctx->scope.local->identifiers = llvm_identifier_list_prepend(ctx->scope.local->identifiers, identifier);
 			i++;
 		}
 		/* TODO: handle arg->type == TOK_VARARGS*/
@@ -89,7 +84,7 @@ tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 	LLVMDisposeBuilder(ctx->builder);
 
-	ctx->scope = llvm_scope_pop_free(ctx->scope);
+	ctx->scope.local = llvm_scope_pop_free(ctx->scope.local);
 	ctx->builder = prev_builder;
 
 	return node;

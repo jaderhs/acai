@@ -1,17 +1,17 @@
 #include <stdlib.h>
 #include <llvm-c/Target.h>
-#include "../parser/ast.h"
 #include "ctx.h"
 #include "acai.h"
 #include "value.h"
-#include "../util.h"
+#include "util.h"
 
 void llvm_create_module(char *name, llvm_ctx *ctx) {
 
 	ctx->module = LLVMModuleCreateWithNameInContext(name, ctx->ctx);
 	ctx->builder = LLVMCreateBuilderInContext(ctx->ctx);
 
-	ctx->scope = llvm_scope_push_new(ctx->scope);
+	ctx->scope.global = llvm_scope_push_new(NULL);
+	ctx->scope.local = NULL;
 }
 
 void llvm_init(llvm_ctx *ctx) {

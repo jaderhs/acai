@@ -3,7 +3,6 @@
 #include <string.h>
 #include <llvm-c/Core.h>
 #include "util.h"
-#include "parser/ast.h"
 #include "ctx.h"
 #include "llvm.h"
 #include "value.h"

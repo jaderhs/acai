@@ -1,31 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "parser/ast.h"
 #include "ctx.h"
 #include "parser/parser.h"
-
-llvm_scope_identifier_list *llvm_scope_push_new(llvm_scope_identifier_list *prev) {
-
-	llvm_scope_identifier_list *list = malloc(sizeof(llvm_scope_identifier_list));
-
-	list->identifiers = NULL;
-	list->next = prev;
-
-	return list;
-}
-
-llvm_scope_identifier_list *llvm_scope_pop_free(llvm_scope_identifier_list *curr) {
-
-	llvm_scope_identifier_list *next = curr->next;
-	free(curr);
-
-	return next;
-}
-
-void llvm_scope_identifier_list_free(llvm_scope_identifier_list *list) {
-	free(list);
-}
 
 llvm_identifier_list *llvm_identifier_list_prepend(llvm_identifier_list *prev, tree *identifier) {
 
@@ -39,6 +16,19 @@ llvm_identifier_list *llvm_identifier_list_prepend(llvm_identifier_list *prev, t
 
 void llvm_identifier_list_free(llvm_identifier_list *list) {
 	free(list);
+}
+
+void llvm_identifier_list_free_all(llvm_identifier_list *list) {
+
+	llvm_identifier_list *next;
+	for(next = list->next; next != NULL; next = list->next) {
+
+		if(list->identifier)
+			tree_free(list->identifier);
+
+		llvm_identifier_list_free(list);
+		list = next;
+	}
 }
 
 tree *llvm_identifier_list_lookup_by_name(llvm_identifier_list *list, char *name) {

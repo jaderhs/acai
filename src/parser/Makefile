@@ -5,7 +5,7 @@ all: lexer $(OBJECTS)
 	ar rcs parser.a $(OBJECTS)
 
 %.o: %.c
-	clang $(DEBUG) -I/usr/include/llvm-5.0 -I/usr/include/llvm-c-5.0 -c -o $@  $<
+	clang $(DEBUG) -I ../ -I/usr/include/llvm-5.0 -I/usr/include/llvm-c-5.0 -c -o $@  $<
 
 lexer: parser lex.l
 	flex -o lex.c lex.l

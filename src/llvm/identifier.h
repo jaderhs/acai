@@ -1,6 +1,5 @@
 #include <llvm-c/Core.h>
-
-/* TODO: implement global scope and stacked children scope + function identifier map */
+#include "parser/ast.h"
 
 typedef struct _llvm_identifier_list {
 
@@ -8,18 +7,6 @@ typedef struct _llvm_identifier_list {
 	struct _llvm_identifier_list *next;
 
 } llvm_identifier_list;
-
-typedef struct _llvm_scope_identifier_list {
-
-	llvm_identifier_list *identifiers;
-	struct _llvm_scope_identifier_list *next;
-	
-} llvm_scope_identifier_list;
-
-llvm_scope_identifier_list *llvm_scope_push_new(llvm_scope_identifier_list *prev);
-llvm_scope_identifier_list *llvm_scope_pop_free(llvm_scope_identifier_list *curr);
-
-void llvm_scope_identifier_list_free(llvm_scope_identifier_list *list);
 
 llvm_identifier_list *llvm_identifier_list_prepend(llvm_identifier_list *prev, tree *identifier);
 void llvm_identifier_list_free(llvm_identifier_list *list);

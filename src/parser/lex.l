@@ -1,10 +1,9 @@
 %option noyywrap yylineno
 %{
-#include "ast.h"
 #include "str.h"
-#include "../llvm/ctx.h"
+#include "llvm/ctx.h"
 #include "parser.h"
-#include "../acai/type.h"
+#include "acai/type.h"
 %}
 
 %x	string comment

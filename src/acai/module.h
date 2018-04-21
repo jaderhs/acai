@@ -1,5 +1,5 @@
 #include "type.h"
-#include "../util.h"
+#include "util.h"
 
 #define ACAI_MODULE_REGISTER(name, module) acai_module_register(name, name, &module, FALSE)
 

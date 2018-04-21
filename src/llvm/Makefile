@@ -1,4 +1,4 @@
-OBJECTS = init.o function_call.o type.o decl_var.o identifier.o value.o acai.o
+OBJECTS = init.o function_call.o type.o decl_var.o identifier.o value.o acai.o scope.o
 DEBUG=-g -ggdb
 
 all: $(OBJECTS)

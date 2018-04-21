@@ -2,10 +2,10 @@ CC=clang
 DEBUG=-g -ggdb
 
 compiler: main.c parser/parser.a llvm/llvm.a acai/acai.a eval/eval.a
-	$(CC) -DCOMPILER -o compiler main.c parser/parser.a eval/eval.a llvm/llvm.a -I/usr/include/llvm-5.0 -I/usr/include/llvm-c-5.0 -L/usr/lib/llvm-5.0/lib -lLLVM $(DEBUG)
+	$(CC) -I . -DCOMPILER -o compiler main.c parser/parser.a eval/eval.a llvm/llvm.a -I/usr/include/llvm-5.0 -I/usr/include/llvm-c-5.0 -L/usr/lib/llvm-5.0/lib -lLLVM $(DEBUG)
 
 repl: main.c parser/parser.a llvm/llvm.a eval/eval.a
-	$(CC) -o repl main.c parser/parser.a eval/eval.a llvm/llvm.a -I/usr/include/llvm-5.0 -I/usr/include/llvm-c-5.0 -L/usr/lib/llvm-5.0/lib -lLLVM $(DEBUG)
+	$(CC) -I . -o repl main.c parser/parser.a eval/eval.a llvm/llvm.a -I/usr/include/llvm-5.0 -I/usr/include/llvm-c-5.0 -L/usr/lib/llvm-5.0/lib -lLLVM $(DEBUG)
 
 parser/parser.a:
 	$(MAKE) -C parser

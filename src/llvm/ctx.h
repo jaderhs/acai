@@ -1,5 +1,5 @@
 #include <llvm-c/Core.h>
-#include "identifier.h"
+#include "scope.h"
 
 #ifndef _LLVM_CTX_H_
 #define _LLVM_CTX_H_
@@ -10,9 +10,13 @@ typedef struct {
 	LLVMModuleRef module;
 	LLVMBuilderRef builder;
 
-	llvm_scope_identifier_list *scope;
-	llvm_identifier_list *global;
+	struct {
+		llvm_scope *global;
+		llvm_scope *local;
+	} scope;
 
 } llvm_ctx;
+
+#define llvm_ctx_get_current_scope(ctx) ctx->scope.local != NULL ? ctx->scope.local : ctx->scope.global
 
 #endif

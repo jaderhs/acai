@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include "eval.h"
 #include "func.h"
-#include "../parser/parser.h"
-#include "../util.h"
-#include "../llvm/value.h"
-#include "../llvm/llvm.h"
+#include "parser/parser.h"
+#include "llvm/value.h"
+#include "llvm/llvm.h"
 
 tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 	tree *p, *type;
 	struct ast_list *l;
+	llvm_scope *curr_scope;
 
 	switch(node->type) {
 
@@ -22,9 +22,14 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 		case TOK_IDENTIFIER:
 			/* Lookup symbol */
-			p = llvm_identifier_list_lookup_by_name(ctx->scope->identifiers, node->v.s);
+
+			p = NULL;
+			if(ctx->scope.local != NULL)
+				p = llvm_identifier_list_lookup_by_name(ctx->scope.local->identifiers, node->v.s);
+
 			if(p == NULL)
-				p = llvm_identifier_list_lookup_by_name(ctx->global, node->v.s);
+				p = llvm_identifier_list_lookup_by_name(ctx->scope.global->identifiers, node->v.s);
+
 			return p;
 
 		case LIST_STATEMENT:
@@ -50,6 +55,8 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 		case LIST_TYPED_IDENTIFIER:
 
+			curr_scope = llvm_ctx_get_current_scope(ctx);
+
 			/* Convert to a LIST_IDENTIFIER of TYPED_IDENTIFIERS */
 			type = eval(ctx, AST_CHILD_LEFT(node), hint);
 
@@ -66,14 +73,14 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 				p->llvm_type = type->llvm_type;
 
-				ctx->scope->identifiers = llvm_identifier_list_prepend(ctx->scope->identifiers, p);
+				curr_scope->identifiers = llvm_identifier_list_prepend(curr_scope->identifiers, p);
 
 				l->node = p;
 
 				if((hint & (EVAL_HINT_DECL_VAR_CONST|EVAL_HINT_DECL_VAR_DONT_INITIALIZE)) == 0) {
 
 					llvm_value_literal *val = llvm_value_zero_initializer(ctx, type->v.i);
-					LLVMBuildStore(ctx->builder, val->value, AST_ACAI_VALUE(p)->value);
+					LLVMBuildStore(ctx->builder, val->value, llvm_acai_value_get_value(ctx, AST_ACAI_VALUE(p)));
 				}
 			}
 

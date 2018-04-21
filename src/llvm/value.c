@@ -1,12 +1,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "../parser/ast.h"
 #include "ctx.h"
-#include "../parser/parser.h"
+#include "parser/parser.h"
 #include "value.h"
-#include "../acai/type.h"
-#include "../util.h"
+#include "acai/type.h"
+#include "util.h"
 
 LLVMTypeRef llvm_value_struct = NULL;
 
@@ -38,13 +37,13 @@ llvm_acai_value *llvm_acai_value_new_alloca(llvm_ctx *ctx, char *llvm_identifier
 	/* alloc acai_type{} */
 	av->begin = LLVMBuildAlloca(ctx->builder, llvm_value_type(), llvm_identifier);
 	LLVMSetAlignment(av->begin, 32);
-
+/*
 	av->type = LLVMBuildStructGEP(ctx->builder, av->begin, 0, "");
 
-	/* Store pointer to flags and value */
+	/* Store pointer to flags and value 
 	av->flags = LLVMBuildStructGEP(ctx->builder, av->begin, 1, "");
 	av->value = LLVMBuildStructGEP(ctx->builder, av->begin, 2, "");
-
+*/
 	return av;
 }
 
@@ -53,8 +52,24 @@ llvm_acai_value *llvm_acai_value_new_alloca_with_type(llvm_ctx *ctx, char *llvm_
 	llvm_acai_value *av = llvm_acai_value_new_alloca(ctx, llvm_identifier);
 
 	/* Set acai_type.type */
-	LLVMBuildStore(ctx->builder, LLVMConstInt(LLVMInt64TypeInContext(ctx->ctx), av_type, FALSE), av->type);
+	LLVMBuildStore(ctx->builder, LLVMConstInt(LLVMInt64TypeInContext(ctx->ctx), av_type, FALSE), llvm_acai_value_get_type(ctx, av));
 	return av;
+}
+
+LLVMValueRef llvm_acai_value_get_type(llvm_ctx *ctx, llvm_acai_value *lav) {
+
+	if(lav->type == NULL)
+		lav->type = LLVMBuildStructGEP(ctx->builder, lav->begin, 0, "");
+
+	return lav->type;
+}
+
+LLVMValueRef llvm_acai_value_get_value(llvm_ctx *ctx, llvm_acai_value *lav) {
+
+	if(lav->value == NULL)
+		lav->value = LLVMBuildStructGEP(ctx->builder, lav->begin, 2, "");
+
+	return lav->value;
 }
 
 void llvm_acai_value_copy(llvm_ctx *ctx, llvm_acai_value *src, llvm_acai_value *dst) {
