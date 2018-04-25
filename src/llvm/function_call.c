@@ -38,10 +38,10 @@ int llvm_argument(llvm_ctx *ctx, tree *node) {
 	if(node->type == TOK_IDENTIFIER) {
 
 		if(ctx->scope.local != NULL)
-			identifier = llvm_identifier_list_lookup_by_name(ctx->scope.local->identifiers, node->v.s);
+			identifier = llvm_symbol_list_lookup_by_name(ctx->scope.local->symbols, node->v.s);
 
 		if(identifier == NULL)
-			identifier = llvm_identifier_list_lookup_by_name(ctx->scope.global->identifiers, node->v.s);
+			identifier = llvm_symbol_list_lookup_by_name(ctx->scope.global->symbols, node->v.s);
 
 		if(identifier == NULL) {
 			fprintf(stderr, "Identifier '%s' not found\n", node->v.s);
@@ -65,11 +65,11 @@ int llvm_argument(llvm_ctx *ctx, tree *node) {
 	return TRUE;
 }
 
-void llvm_function_call(llvm_ctx *ctx, tree *call) {
+tree *llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 	int i, j;
 	char *str;
-	tree *func, *list_parameters, *right, *rvalue;
+	tree *func, *list_parameters, *right, *rvalue, *p;
 	struct ast_list *l;
 	LLVMValueRef llvm_func;
 	LLVMValueRef args[3];
@@ -79,89 +79,131 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 	tree *node = AST_CHILD_LEFT(call);
 
-	if(node->type == TOK_IDENTIFIER) {
+	if(node->type != TOK_IDENTIFIER) {
+		fprintf(stderr, "Unknown func type in llvm_function_call(): %d\n", node->type);
+		return FALSE;
+	}
 
-		str = malloc(strlen(node->v.s) + 16);
-		sprintf(str, "_acai_func_%s", node->v.s);
-
-		func = llvm_identifier_list_lookup_by_name(ctx->scope.global->identifiers, str);
-		if(func == NULL) {
-
-			str = malloc(16 + strlen(node->v.s));
-			sprintf(str, "func-name-%s", node->v.s);
-
-			llvm_func = acai_get_func_call();
-			args[i] = LLVMBuildGlobalStringPtr(ctx->builder, node->v.s, str);
-			i++;
-		}
-		else {
-			llvm_func = func->v.func.llvm_func;
-		}
-
-		right = AST_CHILD_RIGHT(call);
-
-		if(right->type == LIST_EXPRESSION) {
-
-			argc = 0;
-			argcap = 10;
-			argv = calloc(argcap, sizeof(LLVMValueRef));
-
-			AST_LIST_FOREACH(right, l) {
-
-				rvalue = AST_LIST_NODE(l);
-
-				if(llvm_argument(ctx, rvalue) == FALSE) {
-					return;
-				}
-
-				argv[argc] = AST_ACAI_VALUE(rvalue)->begin;
-
-				argc++;
-				if(argc == argcap) {
-
-					argcap += 10;
-					argv = reallocarray(argv, argcap, sizeof(LLVMValueRef));
-				}
-			}
-
-		}
-
-		list_parameters = AST_CHILD_LEFT(((tree*) func->v.func.signature));
-		printf("%d %d\n", argc, tree_list_length(list_parameters));
-		//if(argc < //num of args in func, load default value for rargs)
-
-		argv[argc] = LLVMConstPointerNull(LLVMPointerType(llvm_value_type(), 0));
-
-		str = malloc(24 + strlen(node->v.s));
-		sprintf(str, "func-call-%s-argv", node->v.s);
-/*
-		atp = LLVMBuildStructGEP(ctx->builder, arg, 0, str);
-		LLVMBuildStore(ctx->builder, val[0], atp);
-*/
-
-		args[i++] = LLVMConstInt(LLVMInt64Type(), argc, FALSE);
-		//args[++i] = LLVMConstNull(LLVMPointerType(LLVMPointerType(llvm_value_type(), 0), 0));
-		argv_array = LLVMBuildAlloca(ctx->builder,
-						LLVMArrayType(LLVMPointerType(llvm_value_type(), 0), argc+1),
-//						LLVMConstArray(LLVMPointerType(llvm_value_type(), 0), argv, argc),
-						str);
-
-		/* store argv */
-		LLVMValueRef idx[2];
-		idx[0] = LLVMConstInt(LLVMInt64Type(), 0, FALSE);
-		for(j = 0; j < argc+1; j++) {
-			idx[1] = LLVMConstInt(LLVMInt64Type(), j, FALSE);
-
-			atp = LLVMBuildGEP(ctx->builder, argv_array, idx, 2, "");
-			LLVMBuildStore(ctx->builder, argv[j], atp);
-		}
-
-		atp = LLVMConstInt(LLVMInt64Type(), 0, FALSE);
-		args[i++] = LLVMBuildBitCast(ctx->builder, argv_array, LLVMPointerType(LLVMPointerType(llvm_value_type(), 0), 0), "");
+	func = llvm_symbol_list_lookup_by_name(ctx->scope.global->symbols, node->v.s);
+	if(func == NULL) {
 
 		str = malloc(16 + strlen(node->v.s));
-		sprintf(str, "func-call-%s", node->v.s);
+		sprintf(str, "func-name-%s", node->v.s);
 
-		LLVMBuildCall(ctx->builder, llvm_func, args, i, str);
+		llvm_func = acai_get_func_call();
+		args[i] = LLVMBuildGlobalStringPtr(ctx->builder, node->v.s, str);
+		i++;
 	}
+	else {
+		llvm_func = func->v.func.llvm_func;
+	}
+
+	right = AST_CHILD_RIGHT(call);
+
+	if(right->type == LIST_EXPRESSION) {
+
+		argc = 0;
+		argcap = 10;
+		argv = calloc(argcap, sizeof(LLVMValueRef));
+
+		AST_LIST_FOREACH(right, l) {
+
+			rvalue = AST_LIST_NODE(l);
+
+			if(llvm_argument(ctx, rvalue) == FALSE) {
+				return FALSE;
+			}
+
+			argv[argc] = AST_ACAI_VALUE(rvalue)->begin;
+
+			argc++;
+			if(argc == argcap) {
+
+				argcap += 10;
+				argv = reallocarray(argv, argcap, sizeof(LLVMValueRef));
+			}
+		}
+
+	}
+
+	if(func != NULL) {
+
+		list_parameters = AST_CHILD_LEFT(((tree*) func->v.func.signature));
+
+		if(argc < tree_list_length(list_parameters)) {
+
+			j = 0;
+			AST_LIST_FOREACH(list_parameters, l) {
+
+				if(j >= argc) {
+
+					p = AST_LIST_NODE(l);
+					if(p->type != DECL_PARAM) {
+						fprintf(stderr, "Unknown type in function signature: %d\n", p->type);
+						return FALSE;
+					}
+
+					rvalue = AST_CHILD_RIGHT(p);
+
+					if(rvalue == NULL) {
+						fprintf(stderr, "Missing function arguments on call to %s\n", node->v.s);
+						return FALSE;
+					}
+
+
+					if(llvm_argument(ctx, rvalue) == FALSE) {
+						return FALSE;
+					}
+
+					argv[argc] = AST_ACAI_VALUE(rvalue)->begin;
+
+					argc++;
+					if(argc == argcap) {
+
+						argcap += 10;
+						argv = reallocarray(argv, argcap, sizeof(LLVMValueRef));
+					}
+				}
+
+				j++;
+			}
+		}
+		//if(argc < //num of args in func, load default value for rargs)
+	}
+
+	argv[argc] = LLVMConstPointerNull(LLVMPointerType(llvm_value_type(), 0));
+
+	str = malloc(24 + strlen(node->v.s));
+	sprintf(str, "func-call-%s-argv", node->v.s);
+/*
+	atp = LLVMBuildStructGEP(ctx->builder, arg, 0, str);
+	LLVMBuildStore(ctx->builder, val[0], atp);
+*/
+
+	args[i++] = LLVMConstInt(LLVMInt64Type(), argc, FALSE);
+	//args[++i] = LLVMConstNull(LLVMPointerType(LLVMPointerType(llvm_value_type(), 0), 0));
+	argv_array = LLVMBuildAlloca(ctx->builder,
+					LLVMArrayType(LLVMPointerType(llvm_value_type(), 0), argc+1),
+//						LLVMConstArray(LLVMPointerType(llvm_value_type(), 0), argv, argc),
+					str);
+
+	/* store argv */
+	LLVMValueRef idx[2];
+	idx[0] = LLVMConstInt(LLVMInt64Type(), 0, FALSE);
+	for(j = 0; j < argc+1; j++) {
+		idx[1] = LLVMConstInt(LLVMInt64Type(), j, FALSE);
+
+		atp = LLVMBuildGEP(ctx->builder, argv_array, idx, 2, "");
+		LLVMBuildStore(ctx->builder, argv[j], atp);
+	}
+
+	atp = LLVMConstInt(LLVMInt64Type(), 0, FALSE);
+	args[i++] = LLVMBuildBitCast(ctx->builder, argv_array, LLVMPointerType(LLVMPointerType(llvm_value_type(), 0), 0), "");
+
+	str = malloc(16 + strlen(node->v.s));
+	sprintf(str, "func-call-%s", node->v.s);
+
+	LLVMBuildCall(ctx->builder, llvm_func, args, i, str);
+
+	return node;
 }

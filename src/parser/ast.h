@@ -79,3 +79,5 @@ tree *tree_func_new(tree *identifier, tree *signature, tree *body);
 
 tree *tree_op_new(int type, int op, int is_assignment, tree *left, tree *right);
 void tree_op_free(tree *parent);
+
+char *tree_dotted_identifier_str(tree *dotted_identifier_list);

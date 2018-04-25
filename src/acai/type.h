@@ -24,9 +24,9 @@ enum acai_type {
 	AT_STRING
 };
 
-enum acai_type_flags {
-	ATF_NULL = 1 >> 0,
-	ATF_ZERO = 1 >> 1,
+enum acai_value_flags {
+	AVF_NULL = 1 >> 0,
+	AVF_ZERO = 1 >> 1,
 };
 
 struct _acai_value_list {
@@ -62,5 +62,7 @@ typedef struct {
 		struct _acai_value_list *list;
 	} v;
 } acai_value;
+
+#define ACAI_VALUE_IS_NULL(av) (av->flags & AVF_NULL)!=0
 
 typedef void *(*acai_func)(int argc, acai_value *argv[]);

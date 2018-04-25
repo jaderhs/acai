@@ -1,8 +1,8 @@
-#include "identifier.h"
+#include "symbol.h"
 
 typedef struct _llvm_scope {
 
-	llvm_identifier_list *identifiers;
+	llvm_symbol_list *symbols;
 
 	struct _llvm_scope *next;
 

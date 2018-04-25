@@ -16,7 +16,7 @@ llvm_scope *llvm_scope_pop_free(llvm_scope *curr) {
 
 	llvm_scope *next = curr->next;
 
-	llvm_identifier_list_free_all(curr->identifiers);
+	llvm_symbol_list_free_all(curr->symbols);
 
 	free(curr);
 	return next;

@@ -1,14 +1,15 @@
 #include <llvm-c/Core.h>
 #include "parser/ast.h"
 
-typedef struct _llvm_identifier_list {
+typedef struct _llvm_symbol_list {
 
-	tree *identifier;
-	struct _llvm_identifier_list *next;
+	tree *symbol;
+	struct _llvm_symbol_list *next;
 
-} llvm_identifier_list;
+} llvm_symbol_list;
 
-llvm_identifier_list *llvm_identifier_list_prepend(llvm_identifier_list *prev, tree *identifier);
-void llvm_identifier_list_free(llvm_identifier_list *list);
+llvm_symbol_list *llvm_symbol_list_prepend(llvm_symbol_list *prev, tree *symbol);
+void llvm_symbol_list_free(llvm_symbol_list *list);
+void llvm_symbol_list_free_all(llvm_symbol_list *list);
 
-tree *llvm_identifier_list_lookup_by_name(llvm_identifier_list *list, char *name);
+tree *llvm_symbol_list_lookup_by_name(llvm_symbol_list *list, char *name);

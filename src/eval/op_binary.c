@@ -36,7 +36,7 @@ tree *eval_op_binary(llvm_ctx *ctx, int op, tree *left, tree *right, unsigned in
 			}
 			else if (right->type == LIST_EXPRESSION) {
 
-				llvm_acai_value *lvl = NULL;
+				llvm_acai_value *lav = NULL;
 				llvm_value_literal *val = NULL;
 
 				iter_right = tree_list_get_last(right);
@@ -51,18 +51,23 @@ tree *eval_op_binary(llvm_ctx *ctx, int op, tree *left, tree *right, unsigned in
 
 						if(IS_LITERAL(node_rvalue)) {
 
-							if(node_rvalue->flags & EVAL_HINT_DECL_VAR_CONST) {
-
+							if((node_rvalue->flags & EVAL_HINT_DECL_VAR_CONST) == 0) {
+								val = node_rvalue->lvl;
+							}
+							else {
 								//node_rvalue=DECL_CONST TYPED_IDENTIFIER
 								val = AST_CHILD_RIGHT(node_rvalue)->lvl;
-							} else {
 
-								val = node_rvalue->lvl;
 							}
 						}
 						else if(node_rvalue->type == TYPED_IDENTIFIER) {
 
-							lvl = node_rvalue->av;
+							if((node_rvalue->flags & EVAL_HINT_DECL_VAR_CONST) == 0) {
+								lav = node_rvalue->av;
+							}
+							else {
+								val = node_rvalue->lvl;
+							}
 						}
 
 						iter_right = iter_right->prev;
@@ -85,6 +90,7 @@ tree *eval_op_binary(llvm_ctx *ctx, int op, tree *left, tree *right, unsigned in
 						AST_CHILD_LEFT(tidentifier)->llvm_type = node_rvalue->llvm_type;
 
 						if((hint & EVAL_HINT_DECL_VAR_CONST) != 0) {
+
 							node_rvalue->lvl = llvm_value_literal_new(ctx, node_rvalue);
 
 							//copy value into identifier for constant
@@ -96,13 +102,16 @@ tree *eval_op_binary(llvm_ctx *ctx, int op, tree *left, tree *right, unsigned in
 						}
 
 //						tidentifier->llvm_type = node_rvalue->llvm_type;
-						tree_free(node_lvalue);
 
 						node_lvalue = tidentifier;
 						iter_left->node = tidentifier;
 					}
 
-					curr_scope->identifiers = llvm_identifier_list_prepend(curr_scope->identifiers, node_lvalue);
+					if((hint & EVAL_HINT_DECL_VAR_CONST) != 0) {
+						node_lvalue->lvl = val;
+					}
+
+					curr_scope->symbols = llvm_symbol_list_prepend(curr_scope->symbols, node_lvalue);
 
 					if((hint & (EVAL_HINT_DECL_VAR_CONST|EVAL_HINT_DECL_VAR_DONT_INITIALIZE)) == 0) {
 
@@ -110,9 +119,13 @@ tree *eval_op_binary(llvm_ctx *ctx, int op, tree *left, tree *right, unsigned in
 							ptr = LLVMBuildBitCast(ctx->builder, llvm_acai_value_get_value(ctx, AST_ACAI_VALUE(node_lvalue)), LLVMPointerType(val->type, 0), "");
 							LLVMBuildStore(ctx->builder, val->value, ptr);
 						}
-						else if(lvl != NULL) {
+						else if(lav != NULL) {
 
-							llvm_acai_value_copy(ctx, lvl, AST_ACAI_VALUE(node_lvalue));
+							llvm_acai_value_copy(ctx, lav, AST_ACAI_VALUE(node_lvalue));
+						}
+						else {
+							fprintf(stderr, "Unable to find rvalue for identifier %s\n", node_lvalue->v.child[1]->v.s);
+							return NULL;
 						}
 					}
 				}

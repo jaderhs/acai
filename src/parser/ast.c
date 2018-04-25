@@ -1,7 +1,8 @@
-#include "llvm/ctx.h"
-#include "parser.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "llvm/ctx.h"
+#include "parser.h"
 
 tree *tree_new_empty(int type) {
 
@@ -23,6 +24,24 @@ tree *tree_copy(tree *src) {
 
 	tree *dst = tree_new_empty(src->type);
 	memcpy(dst, src, sizeof(tree));
+
+	switch(dst->type) {
+
+		case LIT_STRING:
+		case TOK_TYPENAME:
+		case TOK_IDENTIFIER:
+			dst->v.s = strdup(src->v.s);
+			break;
+
+		case TYPED_IDENTIFIER:
+			dst->v.child[0] = tree_copy(src->v.child[0]);
+			dst->v.child[1] = tree_copy(src->v.child[1]);
+			break;
+
+		default:
+			fprintf(stderr, "Unknown tree type in tree_copy(): %d\n", dst->type);
+			return NULL;
+	}
 
 	return dst;
 }
@@ -142,4 +161,29 @@ void tree_op_free(tree *parent) {
 
 	tree_free(AST_OP_LEFT(parent));
 	tree_free(AST_OP_RIGHT(parent));
+}
+
+char *tree_dotted_identifier_str(tree *dotted_identifier_list) {
+
+	int cap = 1024;
+	char *name = malloc(cap);
+
+	name[0] = '\0';
+
+	struct ast_list *l;
+	AST_LIST_FOREACH(dotted_identifier_list, l) {
+
+		if(strlen(AST_LIST_NODE(l)->v.s) > cap - strlen(name) + 2) {
+
+			cap += strlen(AST_LIST_NODE(l)->v.s) + 1024;
+			name = realloc(name, cap);
+		}
+
+		if(name[0] != '\0')
+			strncat(name, ".", cap-1);
+
+		strncat(name, AST_LIST_NODE(l)->v.s, cap-1);
+	}
+
+	return name;
 }

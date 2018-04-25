@@ -10,10 +10,10 @@ tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 	int i;
 	char *str;
-	tree *arg, *list_parameters, *identifier;
+	tree *param, *param_identifier, *list_parameters, *identifier;
 	struct ast_list *list;
 	LLVMBuilderRef prev_builder;
-	LLVMValueRef argv, argp, idx[1];
+	LLVMValueRef argv, argp, gep, idx[1];
 
 	LLVMTypeRef params[2];
 	params[0] = LLVMInt64Type();
@@ -53,22 +53,25 @@ tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 	i = 0;
 	AST_LIST_FOREACH(list_parameters, list) {
 
-		arg = AST_LIST_NODE(list);
+		param = AST_LIST_NODE(list);
 
-		if(arg->type == DECL_PARAM) {
+		if(param->type == DECL_PARAM) {
+
+			param_identifier = AST_CHILD_LEFT(param);
+
+			identifier = tree_copy(param_identifier);
 
 			idx[0] = LLVMConstInt(LLVMInt64Type(), i, FALSE);
-			argp = LLVMBuildGEP(ctx->builder, argv, idx, 1, "");
-			argp = LLVMBuildLoad(ctx->builder, argp, "");
 
-			identifier = tree_copy(AST_CHILD_LEFT(arg));
+			gep = LLVMBuildGEP(ctx->builder, argv, idx, 1, "");
+			argp = LLVMBuildLoad(ctx->builder, gep, "");
 
 			identifier->av = llvm_acai_value_new();
 
 			AST_ACAI_VALUE(identifier)->begin = argp;
 			/* TODO: handle default value, typed identifier list */
 
-			ctx->scope.local->identifiers = llvm_identifier_list_prepend(ctx->scope.local->identifiers, identifier);
+			ctx->scope.local->symbols = llvm_symbol_list_prepend(ctx->scope.local->symbols, identifier);
 			i++;
 		}
 		/* TODO: handle arg->type == TOK_VARARGS*/
@@ -76,7 +79,7 @@ tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 	}
 
 	/* Insert function into global scope */
-	ctx->scope.global->identifiers = llvm_identifier_list_prepend(ctx->scope.global->identifiers, node);
+	ctx->scope.global->symbols = llvm_symbol_list_prepend(ctx->scope.global->symbols, node);
 
 	eval(ctx, node->v.func.body, hint);
 

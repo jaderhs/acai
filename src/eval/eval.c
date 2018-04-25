@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "eval.h"
 #include "func.h"
+#include "util.h"
 #include "parser/parser.h"
 #include "llvm/value.h"
 #include "llvm/llvm.h"
@@ -25,10 +26,10 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 			p = NULL;
 			if(ctx->scope.local != NULL)
-				p = llvm_identifier_list_lookup_by_name(ctx->scope.local->identifiers, node->v.s);
+				p = llvm_symbol_list_lookup_by_name(ctx->scope.local->symbols, node->v.s);
 
 			if(p == NULL)
-				p = llvm_identifier_list_lookup_by_name(ctx->scope.global->identifiers, node->v.s);
+				p = llvm_symbol_list_lookup_by_name(ctx->scope.global->symbols, node->v.s);
 
 			return p;
 
@@ -73,7 +74,7 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 				p->llvm_type = type->llvm_type;
 
-				curr_scope->identifiers = llvm_identifier_list_prepend(curr_scope->identifiers, p);
+				curr_scope->symbols = llvm_symbol_list_prepend(curr_scope->symbols, p);
 
 				l->node = p;
 
@@ -101,7 +102,6 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 			if(p != NULL)
 				AST_CHILD_RIGHT(node) = eval(ctx, p, hint);
-
 			return node;
 
 		case DECL_CONST:
@@ -111,8 +111,7 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 			return eval_func_decl(ctx, node, hint);
 
 		case FUNC_CALL:
-			llvm_function_call(ctx, node);
-			break;
+			return llvm_function_call(ctx, node);
 
 		case TOK_TYPENAME:
 			return llvm_type_new(ctx, node);
