@@ -59,7 +59,7 @@ int llvm_argument(llvm_ctx *ctx, tree *node) {
 	}
 	else {
 
-		printf("Unknown llvm node arg=%p type=%d\n", node, node->type);
+		fprintf(stderr, "Unknown llvm node arg=%p type=%d\n", node, node->type);
 		return FALSE;
 	}
 	return TRUE;
@@ -69,9 +69,9 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 	int i, j;
 	char *str;
-	tree *right, *rvalue;
+	tree *func, *list_parameters, *right, *rvalue;
 	struct ast_list *l;
-	LLVMValueRef func;
+	LLVMValueRef llvm_func;
 	LLVMValueRef args[3];
 
 	LLVMValueRef valstr, off, atp, argv_array, *argv, arg;
@@ -84,20 +84,18 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 		str = malloc(strlen(node->v.s) + 16);
 		sprintf(str, "_acai_func_%s", node->v.s);
 
-		/* TOOD: lookup function identifier in global scope and get default argument values */
-
-		func = LLVMGetNamedFunction(ctx->module, str);
-		if(func == NULL)
-			func = LLVMGetNamedFunction(ctx->module, node->v.s);
-
-		i = 0;
+		func = llvm_identifier_list_lookup_by_name(ctx->scope.global->identifiers, str);
 		if(func == NULL) {
+
 			str = malloc(16 + strlen(node->v.s));
 			sprintf(str, "func-name-%s", node->v.s);
 
-			func = acai_get_func_call();
+			llvm_func = acai_get_func_call();
 			args[i] = LLVMBuildGlobalStringPtr(ctx->builder, node->v.s, str);
 			i++;
+		}
+		else {
+			llvm_func = func->v.func.llvm_func;
 		}
 
 		right = AST_CHILD_RIGHT(call);
@@ -128,6 +126,8 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 		}
 
+		list_parameters = AST_CHILD_LEFT(((tree*) func->v.func.signature));
+		printf("%d %d\n", argc, tree_list_length(list_parameters));
 		//if(argc < //num of args in func, load default value for rargs)
 
 		argv[argc] = LLVMConstPointerNull(LLVMPointerType(llvm_value_type(), 0));
@@ -162,6 +162,6 @@ void llvm_function_call(llvm_ctx *ctx, tree *call) {
 		str = malloc(16 + strlen(node->v.s));
 		sprintf(str, "func-call-%s", node->v.s);
 
-		LLVMBuildCall(ctx->builder, func, args, i, str);
+		LLVMBuildCall(ctx->builder, llvm_func, args, i, str);
 	}
 }

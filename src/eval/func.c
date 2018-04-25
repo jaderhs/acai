@@ -75,6 +75,9 @@ tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 	}
 
+	/* Insert function into global scope */
+	ctx->scope.global->identifiers = llvm_identifier_list_prepend(ctx->scope.global->identifiers, node);
+
 	eval(ctx, node->v.func.body, hint);
 
 	/* TODO: standardize a list of acai_value for return */

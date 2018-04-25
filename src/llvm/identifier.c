@@ -37,17 +37,22 @@ tree *llvm_identifier_list_lookup_by_name(llvm_identifier_list *list, char *name
 
 	for(; list != NULL; list = list->next) {
 
-		if(list->identifier->type == TYPED_IDENTIFIER) {
+		identifier = NULL;
+		if(list->identifier->type == DECL_FUNC) {
+			identifier = list->identifier->v.func.identifier;
+		}
+		else if(list->identifier->type == TYPED_IDENTIFIER) {
 
 			identifier = AST_CHILD_RIGHT(list->identifier);
 
-			if(strcmp(identifier->v.s, name)==0)
-				return list->identifier;
-
 		} else {
+
 			printf("Unknown identifier type in scope list: %d\n", list->identifier->type);
 			return NULL;
 		}
+
+		if(strcmp(identifier->v.s, name)==0)
+			return identifier;
 	}
 
 	return NULL;
