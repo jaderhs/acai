@@ -27,7 +27,7 @@ SINGLE_TOKEN	[\(\)\{\}\[\]=,]
 "true"						{ yylval.i = 1; return LIT_BOOLEAN; }
 "false"						{ yylval.i = 0; return LIT_BOOLEAN; }
 
-"null"						{ return LIT_NULL; }
+"null"						{ return TOK_NULL; }
 
 	/* operators */
 

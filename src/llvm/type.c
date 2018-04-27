@@ -38,6 +38,9 @@ int llvm_acai_type_infer(tree *node) {
 			return AT_FLOAT32;
 		case LIT_STRING:
 			return AT_STRING;
+
+		case TOK_NULL:
+			return AT_STRING;
 	}
 
 	return -1;

@@ -27,8 +27,10 @@ tree *tree_copy(tree *src) {
 
 	switch(dst->type) {
 
-		case LIT_STRING:
 		case TOK_TYPENAME:
+			break;
+
+		case LIT_STRING:
 		case TOK_IDENTIFIER:
 			dst->v.s = strdup(src->v.s);
 			break;

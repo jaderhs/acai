@@ -27,12 +27,11 @@ yyerror (llvm_ctx *ctx, char const *s)
 %token <f> LIT_FLOAT
 %token <s> LIT_STRING
 %token <i> LIT_BOOLEAN
-%token LIT_NULL
 
 %token <i> TOK_TYPENAME
 %token <s> TOK_IDENTIFIER
 
-%token TOK_OP_ASSIGNDECLARE TOK_VARARGS TOK_ARRAY
+%token TOK_OP_ASSIGNDECLARE TOK_VARARGS TOK_ARRAY TOK_NULL
 %token OP_UNARY OP_BINARY
 
 %token DECL_VAR DECL_CONST DECL_PARAM DECL_FUNC FUNC_SIG FUNC_CALL BLOCK
@@ -213,7 +212,7 @@ literal:
 |	literal_integer
 |	literal_string
 |	literal_boolean
-|	LIT_NULL		{ $$ = tree_new_empty(LIT_NULL); }
+|	TOK_NULL			{ $$ = tree_new_empty(TOK_NULL); }
 ;
 
 literal_float:

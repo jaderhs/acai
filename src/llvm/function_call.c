@@ -5,6 +5,7 @@
 #include "acai.h"
 #include "value.h"
 #include "util.h"
+#include "acai/type.h"
 #include "parser/parser.h"
 
 void llvm_argument_store(llvm_ctx *ctx, tree *node, llvm_value_literal *lvl) {
@@ -52,9 +53,14 @@ int llvm_argument(llvm_ctx *ctx, tree *node) {
 		//llvm_value_new_identifier(ctx, p, &acai_value);
 		//return TRUE;
 	}
+	else if(node->type == TOK_NULL) {
+
+		LLVMValueRef type;
+		node->av = llvm_acai_value_new_alloca_with_type(ctx, "", AT_STRING, TRUE);
+	}
 	else if((lvl = llvm_value_literal_new(ctx, node)) != NULL) {
 
-		node->av = llvm_acai_value_new_alloca_with_type(ctx, "", lvl->acai_type);
+		node->av = llvm_acai_value_new_alloca_with_type(ctx, "", lvl->acai_type, FALSE);
 		llvm_argument_store(ctx, node, lvl);
 	}
 	else {
@@ -83,6 +89,8 @@ tree *llvm_function_call(llvm_ctx *ctx, tree *call) {
 		fprintf(stderr, "Unknown func type in llvm_function_call(): %d\n", node->type);
 		return FALSE;
 	}
+
+	i = 0;
 
 	func = llvm_symbol_list_lookup_by_name(ctx->scope.global->symbols, node->v.s);
 	if(func == NULL) {
@@ -149,7 +157,6 @@ tree *llvm_function_call(llvm_ctx *ctx, tree *call) {
 						fprintf(stderr, "Missing function arguments on call to %s\n", node->v.s);
 						return FALSE;
 					}
-
 
 					if(llvm_argument(ctx, rvalue) == FALSE) {
 						return FALSE;

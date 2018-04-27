@@ -33,21 +33,27 @@ void *acai_builtin_print(int argc, acai_value *argv[]) {
 		if(i > 0)
 			printf(", ");
 
-		switch(argv[i]->type) {
+		if((argv[i]->flags & AVF_NULL) != 0) {
+			printf("null");
+		}
+		else {
 
-			case AT_FLOAT:
-			case AT_FLOAT32:
-				printf("%f", (float)argv[i]->v.f32);
-				break;
+			switch(argv[i]->type) {
 
-			case AT_INTEGER:
-			case AT_INT64:
-				printf("%lld", argv[i]->v.i64);
-				break;
+				case AT_FLOAT:
+				case AT_FLOAT32:
+					printf("%f", (float)argv[i]->v.f32);
+					break;
 
-			case AT_STRING:
-				printf("%s", argv[i]->v.s);
-				break;
+				case AT_INTEGER:
+				case AT_INT64:
+					printf("%lld", argv[i]->v.i64);
+					break;
+
+				case AT_STRING:
+					printf("%s", argv[i]->v.s);
+					break;
+			}
 		}
 
 	}

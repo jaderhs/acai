@@ -14,7 +14,10 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 	switch(node->type) {
 
-		case LIT_NULL:
+		case TOK_NULL:
+			node->lvl = NULL;
+			return node;
+
 		case LIT_FLOAT:
 		case LIT_INTEGER:
 		case LIT_STRING:

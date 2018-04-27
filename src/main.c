@@ -26,6 +26,8 @@ void usage(char *argv0) {
 			"  -h, --help   Display available options\n"
 #ifdef COMPILER
 			"  -o <file>    Write output to <file>\n"
+#elif REPL
+			"  -v           Print verbose parser output\n"
 #endif
 			, argv0);
 }
@@ -33,25 +35,32 @@ void usage(char *argv0) {
 int main(int argc, char *argv[]) {
 
 	int opt, ret;
-	llvm_ctx ctx;
-#ifdef COMPILER
 	char *err;
+	llvm_ctx ctx;
 	LLVMTargetRef target;
+#ifdef COMPILER
 	char *output = "a.out";
+#elif REPL
+	int verbose =0 ;
 #endif
 
 	memset(&ctx, 0, sizeof(ctx));
 
 #ifdef COMPILER
 	while((opt = getopt_long(argc, argv, "h?o:", optlong, NULL)) != -1) {
-#else
-	while((opt = getopt_long(argc, argv, "h?", optlong, NULL)) != -1) {
+#elif REPL
+	while((opt = getopt_long(argc, argv, "h?v", optlong, NULL)) != -1) {
 #endif
 
 		switch(opt) {
 #ifdef COMPILER
 			case 'o':
 				output = optarg;
+				break;
+#endif
+#ifdef REPL
+			case 'v':
+				verbose = 1;
 				break;
 #endif
 			case 'h':
@@ -61,10 +70,12 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+#ifdef COMPILER
 	if(argc < 2) {
 		fprintf(stderr, "%s: error: no input files\n", argv[0]);
 		return 2;
 	}
+#endif
 
 	llvm_init(&ctx);
 
@@ -75,28 +86,14 @@ int main(int argc, char *argv[]) {
 
 	llvm_create_main(&ctx);
 
-	// parse just one file for now
-	if(strcmp(argv[1], "-")==0)
-		yyin = stdin;
-	else
-		yyin = fopen(argv[1], "r");
-
-	ret = yyparse(&ctx);
-
-	fclose(yyin);
-
-	LLVMBuildRetVoid(ctx.builder);
-
-#ifdef COMPILER
 	char *triple = LLVMGetDefaultTargetTriple();
-
 	LLVMSetTarget(ctx.module, triple);
 
 //	LLVMRunPassManager(pm, ctx.module);
 
 	if(LLVMGetTargetFromTriple(triple, &target, &err) != 0) {
 		fprintf(stderr, "Error fetching target from triple '%s': %s\n", triple, err);
-		return 3;
+		return 5;
 	}
 
 	LLVMTargetMachineRef targetMachine = LLVMCreateTargetMachine(target, triple, "generic", "", LLVMCodeGenLevelNone, LLVMRelocDefault, LLVMCodeModelDefault);
@@ -106,12 +103,32 @@ int main(int argc, char *argv[]) {
 	LLVMSetModuleDataLayout(ctx.module, dl);
 	LLVMSetTarget(ctx.module, triple);
 
+	// parse just one file for now
+#ifdef COMPILER
+	if(strcmp(argv[1], "-")==0)
+		yyin = stdin;
+	else
+		yyin = fopen(argv[1], "r");
+#else
+	yyin = stdin;
+#endif
+	ret = yyparse(&ctx);
+
+	fclose(yyin);
+
+	if(ret != 0)
+		return -(2+ret);
+
+	LLVMBuildRetVoid(ctx.builder);
+
+#ifdef COMPILER
+
 	LLVMDumpModule(ctx.module);
 
 	if(LLVMTargetMachineEmitToFile(targetMachine, ctx.module, "output.o", LLVMObjectFile, &err) != 0) {
 		fprintf(stderr, "Error generating output: %s\n", err);
 		LLVMDisposeMessage(err);
-		return 4;
+		return 6;
 	}
 
 	//link
@@ -164,11 +181,15 @@ int main(int argc, char *argv[]) {
 
 		execv(args[0], args);
 	}
-#else
-	LLVMDumpModule(ctx.module);
+
+	LLVMDisposeTargetMachine(targetMachine);
+#elif REPL
+
+
+
 #endif
 
 	llvm_finish(&ctx);
 
-	return ret;
+	return 0;
 }
