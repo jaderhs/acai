@@ -18,4 +18,4 @@ parser: parser.y
 	bison -d -o parser.c parser.y
 
 clean:
-	rm -f lex.c parser.c parser.h $(OBJECTS) lex.o lex_i.o parser.a parser_i.a
+	rm -f lex.c lex_i.c parser.c parser.h $(OBJECTS) lex.o lex_i.o parser.a parser_i.a
