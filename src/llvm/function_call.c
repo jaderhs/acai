@@ -1,27 +1,28 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
-#include "ctx.h"
+#include "eval/eval.h"
 #include "acai.h"
 #include "value.h"
 #include "util.h"
 #include "acai/type.h"
 #include "parser/parser.h"
 
-void llvm_argument_store(llvm_ctx *ctx, tree *node, llvm_value_literal *lvl) {
+void llvm_argument_store(llvm_ctx *ctx, int is_string, tree *node, llvm_value_literal *lvl) {
 
 	LLVMValueRef llvm_str;
 
 	/* store string */
-	if(node->type == LIT_STRING) {
-		llvm_str = LLVMBuildAlloca(ctx->builder, LLVMArrayType(LLVMInt8Type(), strlen(node->v.s)+1), "");
+	if(is_string != FALSE) {
+
+		llvm_str = LLVMBuildAlloca(ctx->builder, lvl->type, "");
 		LLVMBuildStore(ctx->builder, lvl->value, llvm_str);
 	}
 
 	/* cast acai.value to argument type */
 	LLVMValueRef val_cast = LLVMBuildBitCast(ctx->builder, llvm_acai_value_get_value(ctx, AST_ACAI_VALUE(node)), LLVMPointerType(lvl->type, 0), "");
 
-	if(node->type == LIT_STRING) {
+	if(is_string != FALSE) {
 		LLVMBuildStore(ctx->builder, llvm_str, val_cast);
 	}
 	else {
@@ -49,9 +50,20 @@ int llvm_argument(llvm_ctx *ctx, tree *node) {
 			return FALSE;
 		}
 
-		node->av = identifier->av;
-		//llvm_value_new_identifier(ctx, p, &acai_value);
-		//return TRUE;
+		if((identifier->flags & EVAL_HINT_DECL_VAR_CONST) != 0) {
+
+			if(identifier->type != TYPED_IDENTIFIER) {
+				fprintf(stderr, "Unknown constant identifier '%s' type", node->v.s);
+				return FALSE;
+			}
+
+			node->av = llvm_acai_value_new_alloca_with_type(ctx, "", ((llvm_value_literal *)identifier->lvl)->acai_type, FALSE);
+			llvm_argument_store(ctx, ((llvm_value_literal *)identifier->lvl)->acai_type == AT_STRING, node, identifier->lvl);
+		}
+		else {
+
+			node->av = identifier->av; //acai_value from original identifier
+		}
 	}
 	else if(node->type == TOK_NULL) {
 
@@ -61,7 +73,7 @@ int llvm_argument(llvm_ctx *ctx, tree *node) {
 	else if((lvl = llvm_value_literal_new(ctx, node)) != NULL) {
 
 		node->av = llvm_acai_value_new_alloca_with_type(ctx, "", lvl->acai_type, FALSE);
-		llvm_argument_store(ctx, node, lvl);
+		llvm_argument_store(ctx, node->type == LIT_STRING, node, lvl);
 	}
 	else {
 

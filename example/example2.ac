@@ -1,36 +1,20 @@
 
-const int w = 99
-const x := 98
+print("hello 000")
 
-int y = x
+const myconst := "hello 123"
 
-string z = null
-//z = w
+print(myconst)
 
-//func main(int argc, string[] argv) int {
+string s1 = "hello 456"
+print(s1)
+
+
 
 func hello(string s1, string s2, string s3, string s4="earth") int {
-//	string[] ss
 
-//	int n = 97
-
-	x := null
-
-	//TODO: fix s3 is null
-	print("hello", s1, s2, s3, s4, x);
-	//print("hello 123");
+	print("hello", s1, s2, s3, s4);
 
 	return 0;
 }
 
-string s2 = "OK"
-
 hello("people", "of", "the")
-
-
-
-int a
-string y,z = null
-x := null
-
-print(a,y,z,x)

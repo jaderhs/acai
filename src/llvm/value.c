@@ -97,6 +97,11 @@ llvm_acai_value *llvm_acai_value_new_alloca_with_type(llvm_ctx *ctx, char *llvm_
 
 	if(initialize != FALSE) {
 		llvm_acai_value_initialize(ctx, av_type, av);
+	} else {
+
+		//zero flags
+		LLVMValueRef vptr = llvm_acai_value_get_flags(ctx, av);
+		LLVMBuildStore(ctx->builder, LLVMConstInt(LLVMInt64TypeInContext(ctx->ctx), 0, FALSE), vptr);
 	}
 
 	return av;

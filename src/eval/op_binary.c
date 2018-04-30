@@ -12,7 +12,7 @@ tree *eval_op_binary(llvm_ctx *ctx, int op, tree *left, tree *right, unsigned in
 	struct ast_list *iter_left, *iter_right;
 	LLVMValueRef ptr;
 	llvm_acai_value *lav = NULL;
-	llvm_value_literal *val = NULL;
+	llvm_value_literal *lvl = NULL;
 
 	llvm_scope *curr_scope = llvm_ctx_get_current_scope(ctx);
 
@@ -39,7 +39,7 @@ tree *eval_op_binary(llvm_ctx *ctx, int op, tree *left, tree *right, unsigned in
 			iter_right = tree_list_get_last(right);
 			AST_LIST_FOREACH(left, iter_left) {
 
-				val = NULL;
+				lvl = NULL;
 				lav = NULL;
 
 				lvalue = AST_LIST_NODE(iter_left);
@@ -68,7 +68,7 @@ tree *eval_op_binary(llvm_ctx *ctx, int op, tree *left, tree *right, unsigned in
 					}
 					else {
 
-						llvm_decl_var(ctx, tidentifier);
+						llvm_decl_var(ctx, tidentifier, FALSE);
 					}
 
 					lvalue = tidentifier;
@@ -79,11 +79,11 @@ tree *eval_op_binary(llvm_ctx *ctx, int op, tree *left, tree *right, unsigned in
 					if(IS_LITERAL(rvalue)) {
 
 						if((rvalue->flags & EVAL_HINT_DECL_VAR_CONST) == 0) {
-							val = rvalue->lvl;
+							lvl = rvalue->lvl;
 						}
 						else {
 							//rvalue=DECL_CONST TYPED_IDENTIFIER
-							val = AST_CHILD_RIGHT(rvalue)->lvl;
+							lvl = AST_CHILD_RIGHT(rvalue)->lvl;
 						}
 					}
 					else if(rvalue->type == TYPED_IDENTIFIER) {
@@ -92,7 +92,7 @@ tree *eval_op_binary(llvm_ctx *ctx, int op, tree *left, tree *right, unsigned in
 							lav = rvalue->av;
 						}
 						else {
-							val = rvalue->lvl;
+							lvl = rvalue->lvl;
 						}
 					}
 					else if(rvalue->type == TOK_NULL) {
@@ -102,16 +102,28 @@ tree *eval_op_binary(llvm_ctx *ctx, int op, tree *left, tree *right, unsigned in
 				}
 
 				if((hint & EVAL_HINT_DECL_VAR_CONST) != 0) {
-					lvalue->lvl = val;
+					lvalue->lvl = lvl;
 				}
 
 				curr_scope->symbols = llvm_symbol_list_prepend(curr_scope->symbols, lvalue);
 
 				if((hint & (EVAL_HINT_DECL_VAR_CONST|EVAL_HINT_DECL_VAR_DONT_INITIALIZE)) == 0) {
 
-					if(val != NULL) {
-						ptr = LLVMBuildBitCast(ctx->builder, llvm_acai_value_get_value(ctx, AST_ACAI_VALUE(lvalue)), LLVMPointerType(val->type, 0), "");
-						LLVMBuildStore(ctx->builder, val->value, ptr);
+					if(lvl != NULL) {
+
+						LLVMValueRef llvm_val = lvl->value;
+						LLVMTypeRef llvm_type = LLVMPointerType(lvl->type, 0);
+
+						if(rvalue != NULL && rvalue->type == LIT_STRING) {
+
+							llvm_val = LLVMBuildAlloca(ctx->builder, lvl->type, "");
+							LLVMBuildStore(ctx->builder, lvl->value, llvm_val);
+
+							llvm_type = LLVMPointerType(llvm_type, 0);
+						}
+
+						ptr = LLVMBuildBitCast(ctx->builder, llvm_acai_value_get_value(ctx, AST_ACAI_VALUE(lvalue)), llvm_type, "");
+						LLVMBuildStore(ctx->builder, llvm_val, ptr);
 					}
 					else if(lav != NULL) {
 

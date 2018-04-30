@@ -72,7 +72,7 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 				p->flags = hint;
 
 				if((hint & EVAL_HINT_DECL_VAR_CONST) == 0) {
-					llvm_decl_var(ctx, p);
+					llvm_decl_var(ctx, p, (hint & EVAL_HINT_DECL_VAR_DONT_INITIALIZE) == 0);
 				}
 
 				p->llvm_type = type->llvm_type;
