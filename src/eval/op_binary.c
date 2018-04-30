@@ -74,7 +74,11 @@ tree *eval_op_binary(llvm_ctx *ctx, int op, tree *left, tree *right, unsigned in
 					lvalue = tidentifier;
 				}
 
-				if(rvalue != NULL) {
+				if(rvalue == NULL) {
+
+					llvm_acai_value_initialize(ctx, AST_CHILD_LEFT(lvalue)->v.i, AST_ACAI_VALUE(lvalue));
+				}
+				else {
 
 					if(IS_LITERAL(rvalue)) {
 
