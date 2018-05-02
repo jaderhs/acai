@@ -98,10 +98,28 @@ tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 tree *eval_func_return(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
+	struct ast_list *l;
 	tree *values = AST_CHILD_LEFT(node);
 
-	if(values != NULL) {
+	if(values == NULL) {
+		LLVMBuildRetVoid(ctx->builder);
+	}
+	else if(values->type != LIST_EXPRESSION) {
+		fprintf(stderr, "Unknown return type %d\n", values->type);
+		return NULL;
+	}
+	else {
 
+		if(ast_list_length(values) == 1) {
+
+		}
+
+		AST_LIST_FOREACH(values, l) {
+
+			switch(AST_LIST_NODE(l)->type) {
+
+			}
+		}
 	}
 
 	return node;

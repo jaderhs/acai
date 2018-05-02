@@ -21,8 +21,9 @@ int x, y = 99
 z := 98
 print(x, y, z)
 
-func a(int x=1212) {
+func a(int x=1212) int {
 	print(x)
+	return
 }
 
 
