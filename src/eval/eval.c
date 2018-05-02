@@ -21,7 +21,7 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 		case LIT_FLOAT:
 		case LIT_INTEGER:
 		case LIT_STRING:
-			node->lvl = llvm_value_literal_new(ctx, node);
+			node->lvl = llvm_value_literal_new_from_node(ctx, node);
 			return node;
 
 		case TOK_IDENTIFIER:

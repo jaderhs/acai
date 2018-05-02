@@ -13,3 +13,4 @@ void llvm_symbol_list_free(llvm_symbol_list *list);
 void llvm_symbol_list_free_all(llvm_symbol_list *list);
 
 tree *llvm_symbol_list_lookup_by_name(llvm_symbol_list *list, char *name);
+tree *llvm_symbol_list_lookup_by_name_and_type(llvm_symbol_list *list, char *name, int type);

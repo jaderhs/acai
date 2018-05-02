@@ -8,8 +8,6 @@ print(myconst)
 string s1 = "hello 456"
 print(s1)
 
-
-
 func hello(string s1, string s2, string s3, string s4="earth") int {
 
 	print("hello", s1, s2, s3, s4);
@@ -18,3 +16,14 @@ func hello(string s1, string s2, string s3, string s4="earth") int {
 }
 
 hello("people", "of", "the")
+
+int x, y = 99
+z := 98
+print(x, y, z)
+
+func a(int x=1212) {
+	print(x)
+}
+
+
+a()

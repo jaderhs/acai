@@ -61,7 +61,7 @@ tree *eval_op_binary(llvm_ctx *ctx, int op, tree *left, tree *right, unsigned in
 
 					if((hint & EVAL_HINT_DECL_VAR_CONST) != 0) { //is const
 
-						rvalue->lvl = llvm_value_literal_new(ctx, rvalue);
+						rvalue->lvl = llvm_value_literal_new_from_node(ctx, rvalue);
 
 						//copy value into identifier for constant
 						AST_CHILD_RIGHT(tidentifier)->lvl = rvalue->lvl;

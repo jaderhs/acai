@@ -31,12 +31,15 @@ void llvm_symbol_list_free_all(llvm_symbol_list *list) {
 	}
 }
 
-tree *llvm_symbol_list_lookup_by_name(llvm_symbol_list *list, char *name) {
+tree *llvm_symbol_list_lookup_by_name_and_type(llvm_symbol_list *list, char *name, int type) {
 
 	int cmp;
 	char *symbol_name;
 
 	for(; list != NULL; list = list->next) {
+
+		if(type != -1 && list->symbol->type != type)
+			continue;
 
 		switch(list->symbol->type) {
 
@@ -55,6 +58,10 @@ tree *llvm_symbol_list_lookup_by_name(llvm_symbol_list *list, char *name) {
 				symbol_name = AST_CHILD_RIGHT(list->symbol)->v.s;
 				break;
 
+			case LIT_STRING:
+				symbol_name = list->symbol->v.s;
+				break;
+
 			default:
 				printf("Unknown symbol type in scope list: %d\n", list->symbol->type);
 				return NULL;
@@ -70,4 +77,9 @@ tree *llvm_symbol_list_lookup_by_name(llvm_symbol_list *list, char *name) {
 	}
 
 	return NULL;
+}
+
+tree *llvm_symbol_list_lookup_by_name(llvm_symbol_list *list, char *name) {
+
+	return llvm_symbol_list_lookup_by_name_and_type(list, name, -1);
 }

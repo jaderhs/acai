@@ -70,7 +70,7 @@ int llvm_argument(llvm_ctx *ctx, tree *node) {
 		LLVMValueRef type;
 		node->av = llvm_acai_value_new_alloca_with_type(ctx, "", AT_STRING, TRUE);
 	}
-	else if((lvl = llvm_value_literal_new(ctx, node)) != NULL) {
+	else if((lvl = llvm_value_literal_new_from_node(ctx, node)) != NULL) {
 
 		node->av = llvm_acai_value_new_alloca_with_type(ctx, "", lvl->acai_type, FALSE);
 		llvm_argument_store(ctx, node->type == LIT_STRING, node, lvl);
@@ -104,14 +104,28 @@ tree *llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 	i = 0;
 
-	func = llvm_symbol_list_lookup_by_name(ctx->scope.global->symbols, node->v.s);
+	func = llvm_symbol_list_lookup_by_name_and_type(ctx->scope.global->symbols, node->v.s, DECL_FUNC);
 	if(func == NULL) {
 
 		str = malloc(16 + strlen(node->v.s));
 		sprintf(str, "func-name-%s", node->v.s);
 
 		llvm_func = acai_get_func_call();
-		args[i] = LLVMBuildGlobalStringPtr(ctx->builder, node->v.s, str);
+
+		p = llvm_symbol_list_lookup_by_name_and_type(ctx->scope.global->symbols, str, LIT_STRING);
+		if(p == NULL) {
+
+			p = tree_new_empty(LIT_STRING);
+			p->v.s = strdup(str);
+
+			p->lvl = llvm_value_literal_new(ctx);
+			AST_VALUE_LITERAL(p)->value = LLVMBuildGlobalStringPtr(ctx->builder, node->v.s, str);
+
+			ctx->scope.global->symbols = llvm_symbol_list_prepend(ctx->scope.global->symbols, p);
+		}
+
+		args[i] = AST_VALUE_LITERAL(p)->value;
+
 		i++;
 	}
 	else {
@@ -120,11 +134,11 @@ tree *llvm_function_call(llvm_ctx *ctx, tree *call) {
 
 	right = AST_CHILD_RIGHT(call);
 
-	if(right->type == LIST_EXPRESSION) {
+	argc = 0;
+	argcap = 10;
+	argv = calloc(argcap, sizeof(LLVMValueRef));
 
-		argc = 0;
-		argcap = 10;
-		argv = calloc(argcap, sizeof(LLVMValueRef));
+	if(right != NULL && right->type == LIST_EXPRESSION) {
 
 		AST_LIST_FOREACH(right, l) {
 

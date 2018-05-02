@@ -38,5 +38,6 @@ LLVMValueRef llvm_acai_value_get_value(llvm_ctx *ctx, llvm_acai_value *lav);
 
 void llvm_acai_value_copy(llvm_ctx *ctx, llvm_acai_value *src, llvm_acai_value *dst);
 
-llvm_value_literal *llvm_value_literal_new(llvm_ctx *ctx, tree *node);
+llvm_value_literal *llvm_value_literal_new(llvm_ctx *ctx);
+llvm_value_literal *llvm_value_literal_new_from_node(llvm_ctx *ctx, tree *node);
 llvm_value_literal *llvm_value_zero_initializer(llvm_ctx *ctx, int av_type);

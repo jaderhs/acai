@@ -145,12 +145,16 @@ void llvm_acai_value_copy(llvm_ctx *ctx, llvm_acai_value *src, llvm_acai_value *
 	/* TODO: handle strings (are strings cow)? */
 }
 
-llvm_value_literal *llvm_value_literal_new(llvm_ctx *ctx, tree *node) {
+llvm_value_literal *llvm_value_literal_new(llvm_ctx *ctx) {
+	return malloc(sizeof(llvm_value_literal));
+}
+
+llvm_value_literal *llvm_value_literal_new_from_node(llvm_ctx *ctx, tree *node) {
 
 	int i;
 	LLVMValueRef val[8];
 
-	llvm_value_literal *lvl = malloc(sizeof(llvm_value_literal));
+	llvm_value_literal *lvl = llvm_value_literal_new(ctx);
 
 	switch(node->type) {
 
