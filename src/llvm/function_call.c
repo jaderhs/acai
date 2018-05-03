@@ -233,10 +233,16 @@ tree *llvm_function_call(llvm_ctx *ctx, tree *call) {
 	atp = LLVMConstInt(LLVMInt64Type(), 0, FALSE);
 	args[i++] = LLVMBuildBitCast(ctx->builder, argv_array, LLVMPointerType(LLVMPointerType(llvm_value_type(), 0), 0), "");
 
+
+	p = tree_new_empty(0);
+	p->av = llvm_acai_value_new_alloca(ctx, "");
+
+	args[i++] = AST_ACAI_VALUE(p)->begin;
+
 	str = malloc(16 + strlen(node->v.s));
 	sprintf(str, "func-call-%s", node->v.s);
 
 	LLVMBuildCall(ctx->builder, llvm_func, args, i, str);
 
-	return node;
+	return p;
 }

@@ -51,6 +51,8 @@ typedef struct ast_tree {
 		struct ast_func func;
 	} v;
 
+	struct ast_tree *parent;
+
 	void *av;				//a struct llvm_acai_value pointer holding parameters/function declaration values
 	void *lvl;				//a struct llvm_literal_value for rvalue's
 	LLVMTypeRef llvm_type;	//a TYPED_IDENTIFIER llvm_type
@@ -72,6 +74,12 @@ unsigned int tree_list_length(tree *parent);
 struct ast_list *tree_list_get_first(tree *parent);
 struct ast_list *tree_list_get_last(tree *parent);
 
+tree *tree_find_ancestor_by_type(tree *node, int type);
+
+#define tree_set_child_left(p, lchild)		p->v.child[0] = lchild; p->v.child[0]->parent = p;
+#define tree_set_child_right(p, rchild)		p->v.child[1] = rchild; p->v.child[1]->parent = p;
+
+#define tree_set_parent(child, p)			if(child != NULL) child->parent = p
 
 tree *tree_variable_type_new(int type, int is_array);
 

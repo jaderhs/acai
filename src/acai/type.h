@@ -65,4 +65,4 @@ typedef struct {
 
 #define ACAI_VALUE_IS_NULL(av) (av->flags & AVF_NULL)!=0
 
-typedef void *(*acai_func)(int argc, acai_value *argv[]);
+typedef int (*acai_func)(int argc, acai_value *argv[], acai_value *ret);

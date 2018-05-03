@@ -36,8 +36,8 @@ tree *tree_copy(tree *src) {
 			break;
 
 		case TYPED_IDENTIFIER:
-			dst->v.child[0] = tree_copy(src->v.child[0]);
-			dst->v.child[1] = tree_copy(src->v.child[1]);
+			tree_set_child_left(dst, tree_copy(AST_CHILD_LEFT(src)));
+			tree_set_child_right(dst, tree_copy(AST_CHILD_RIGHT(src)));
 			break;
 
 		default:
@@ -51,8 +51,12 @@ tree *tree_copy(tree *src) {
 tree *tree_new(int type, tree *left, tree *right) {
 
 	tree *parent = tree_new_empty(type);
+
 	AST_CHILD_LEFT(parent) = left;
 	AST_CHILD_RIGHT(parent) = right;
+
+	tree_set_parent(left, parent);
+	tree_set_parent(right, parent);
 
 	return parent;
 }
@@ -65,6 +69,8 @@ tree *tree_list_new(int type, tree *child) {
 	parent->v.list->next = NULL;
 	parent->v.list->prev = NULL;
 	parent->v.list->node = child;
+
+	tree_set_parent(child, parent);
 
 	return parent;
 }
@@ -80,6 +86,8 @@ tree *tree_list_prepend(tree *parent, tree *child) {
 	list->next->prev = list;
 
 	parent->v.list = list;
+
+	tree_set_parent(child, parent);
 
 	return parent;
 }
@@ -125,6 +133,19 @@ struct ast_list *tree_list_get_last(tree *parent) {
 	return l;
 }
 
+tree *tree_find_ancestor_by_type(tree *node, int type) {
+
+	tree *p;
+	for(p = node->parent; p != NULL; p = p->parent) {
+
+		if(p->type == type)
+			return p;
+
+	}
+
+	return NULL;
+}
+
 tree *tree_variable_type_new(int type, int is_array) {
 
 	tree *parent = tree_new_empty(TOK_TYPENAME);
@@ -143,6 +164,10 @@ tree *tree_func_new(tree *identifier, tree *signature, tree *body) {
 	parent->v.func.signature = signature;
 	parent->v.func.body = body;
 
+	tree_set_parent(body, parent);
+	tree_set_parent(identifier, parent);
+	tree_set_parent(signature, parent);
+
 	return parent;
 }
 
@@ -155,6 +180,9 @@ tree *tree_op_new(int type, int op, int is_assignment, tree *left, tree *right) 
 
 	AST_OP_LEFT(parent) = left;
 	AST_OP_RIGHT(parent) = right;
+
+	tree_set_parent(left, parent);
+	tree_set_parent(right, parent);
 
 	return parent;
 }

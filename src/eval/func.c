@@ -15,13 +15,14 @@ tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 	LLVMBuilderRef prev_builder;
 	LLVMValueRef argv, argp, gep, idx[1];
 
-	LLVMTypeRef params[2];
+	LLVMTypeRef params[3];
 	params[0] = LLVMInt64Type();
 	params[1] = LLVMPointerType(LLVMPointerType(llvm_value_type(), 0), 0);
+	params[2] = LLVMPointerType(llvm_value_type(), 0);
 
 	LLVMAttributeRef attr = LLVMCreateEnumAttribute(ctx->ctx, LLVMGetEnumAttributeKindForName("alignstack", 10), 16);
 
-	LLVMTypeRef func_spec = LLVMFunctionType(LLVMVoidType(), params, 2, FALSE);
+	LLVMTypeRef func_spec = LLVMFunctionType(LLVMVoidType(), params, 3, FALSE);
 
 	if(tree_list_length(node->v.func.identifier) > 1) {
 		fprintf(stderr, "DECL_FUNC multi-identifier not implemented!\n");
@@ -99,7 +100,9 @@ tree *eval_func_decl(llvm_ctx *ctx, tree *node, unsigned int hint) {
 tree *eval_func_return(llvm_ctx *ctx, tree *node, unsigned int hint) {
 
 	struct ast_list *l;
-	tree *values = AST_CHILD_LEFT(node);
+	tree *values, *func, *retsig;
+
+	values = AST_CHILD_LEFT(node);
 
 	if(values == NULL) {
 		LLVMBuildRetVoid(ctx->builder);
@@ -110,13 +113,23 @@ tree *eval_func_return(llvm_ctx *ctx, tree *node, unsigned int hint) {
 	}
 	else {
 
-		if(ast_list_length(values) == 1) {
+		tree *func = tree_find_ancestor_by_type(node, DECL_FUNC);
+		if(func == NULL) {
+			fprintf(stderr, "Function not found for return\n");
+			return NULL;
+		}
 
+		retsig = AST_CHILD_RIGHT(func->v.func.signature);
+
+		if(tree_list_length(values) == 1) {
+
+			
 		}
 
 		AST_LIST_FOREACH(values, l) {
 
 			switch(AST_LIST_NODE(l)->type) {
+
 
 			}
 		}

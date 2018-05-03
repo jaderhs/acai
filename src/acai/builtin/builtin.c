@@ -20,10 +20,10 @@ acai_module *acai_builtin_get_module(void) {
 	return &acai_module_builtin;
 }
 
-void *acai_builtin_print(int argc, acai_value *argv[]) {
+int acai_builtin_print(int argc, acai_value *argv[], acai_value *ret) {
 
 	if(argc == 0)
-		return NULL;
+		return 0;
 
 	if(argc > 1)
 		printf("(");
@@ -62,5 +62,5 @@ void *acai_builtin_print(int argc, acai_value *argv[]) {
 		printf(")");
 
 	printf("\n");
-	return NULL;
+	return 0;
 }

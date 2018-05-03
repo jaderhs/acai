@@ -104,7 +104,7 @@ tree *eval(llvm_ctx *ctx, tree *node, unsigned int hint) {
 			p = AST_CHILD_RIGHT(node);
 
 			if(p != NULL)
-				AST_CHILD_RIGHT(node) = eval(ctx, p, hint);
+				tree_set_child_right(node, eval(ctx, p, hint));
 			return node;
 
 		case DECL_CONST:
