@@ -19,3 +19,23 @@ Identifiers start with underline (\_) or a letter, followed by alphanumeric char
 
 ### Keywords
 
+- as
+- break
+- case
+- const
+- continue
+- else
+- elseif
+- export
+- for
+- func
+- global
+- if
+- import
+- local
+- return
+- sizeof
+- switch
+- typedef
+- typeof
+- enum
