@@ -1,0 +1,100 @@
+%YAML 1.2
+---
+# http://www.sublimetext.com/docs/3/syntax.html
+name: Acai
+comment: Acai Syntax
+file_extensions:
+  - ac
+  - aç
+  - acai
+scope: source.ac
+
+contexts:
+  main:
+    - match: '"'
+      push: string
+    - match: //.*
+      scope: comment.line.ac
+    - match: /\*
+      push: multi-line-comment
+
+    - match: \b(import|export)\b
+      scope: keyword.control.import.ac
+
+    - match: \b(as|break|case|const|continue|for|return|sizeof|switch|typedef|typeof|enum)\b
+      scope: keyword.control.ac
+    - match: \b(if|else|elseif)\b
+      scope: keyword.control.conditional.ac
+    - match: \b(global|local)\b
+      scope: storage.modifier.ac
+    - match: \b(bool|byte|u?char|u?int(8|16|32|64|128)?|float|d?double|set|s?dict|object|b?string)\b
+      scope: storage.type.ac
+    - match: \bfunc\b
+      scope: keyword.control.ac
+      push: func
+    - match: '\+\+|\-\-'
+      scope: keyword.operator.arithmetic.ac
+    - match: '[=><!]='
+      scope: keyword.operator.ac
+    - match: '([\+\-\*/\%:&\|^]|>>|<<)?='
+      scope: keyword.operator.assignment.ac
+    - match: '[\+\-\*/%]'
+      scope: keyword.operator.arithmetic.ac
+    - match: '([&\|^]|<<|>>)'
+      scope: keyword.operator.bitwise.ac
+    - match: \b(and|or|not)\b
+      scope: keyword.operator.word.ac
+    - match: \b(0x\h+|[0-9]+(\.[0-9]+)?|\.[0-9]+)\b
+      scope: constant.numeric.ac
+    - match: \b\.\b
+      scope: punctuation.accessor.ac
+    - match: ','
+      scope: punctuation.separator.ac
+    - match: ';'
+      scope: punctuation.terminator.ac
+
+    - match: '\b[_[:alpha:]](\w+)?\b'
+      scope: variable.other.readwrite.ac
+
+    - match: \(
+      push: parenthesis
+    - match: '\['
+      push: brackets
+    - match: '{'
+      push: braces
+    - match: '[\)\]}]'
+      scope: invalid.illegal.ac
+
+  string:
+    - meta_scope: string.quoted.double.ac
+    - match: \\x\h+
+      scope: constant.character.escape.ac
+    - match: \\[nt\\]?
+      scope: constant.character.escape.ac
+    - match: '"'
+      pop: true
+
+  multi-line-comment:
+    - meta_scope: comment.block.ac
+    - match: \*/
+      pop: true
+
+  parenthesis:
+    - match: \)
+      pop: true
+    - include: main
+
+  brackets:
+    - match: '\]'
+      pop: true
+    - include: main
+
+  braces:
+    - match: '}'
+      pop: true
+    - include: main
+
+  func:
+    - match: '[_[:alpha:]](\w+)?'
+      scope: entity.name.function.ac
+      pop: true

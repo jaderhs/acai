@@ -1,0 +1,13 @@
+{
+  "name": "sublime-acai",
+  "version": "0.1.0",
+  "author": "Jader H. Silva",
+  "description": "Acai Syntax Highlighting",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jaderhs/acai.git"
+  },
+  "license": "Apache 2.0"
+}
