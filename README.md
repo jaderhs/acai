@@ -13,7 +13,7 @@ Multi-line comments start with /\* and stop at \*/.
 
 Statements may optionally end with semicolons
 
-### Indentifiers
+### Identifiers
 
 Identifiers start with underline (\_) or a letter, followed by alphanumeric characters.
 
@@ -39,3 +39,26 @@ Identifiers start with underline (\_) or a letter, followed by alphanumeric char
 - typedef
 - typeof
 - enum
+
+### Operators
+
+- \+ - \* / %
+- & | ^ << >>
+- += -= \*= /= %=
+- &= |= ^= <<= >>=
+- ++ --
+- and or not
+- \> < = :=
+- \>= <= == !=
+- () [] {} , ; .
+
+### Literals
+
+#### Integers
+
+A sequence of digits, optionally prefixed with "0" for octal and "0x" for hexadecimal, e.g.:
+```
+1234
+0xDEADBEEF
+0777
+```

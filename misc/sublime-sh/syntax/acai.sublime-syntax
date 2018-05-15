@@ -44,8 +44,14 @@ contexts:
       scope: keyword.operator.bitwise.ac
     - match: \b(and|or|not)\b
       scope: keyword.operator.word.ac
-    - match: \b(0x\h+|[0-9]+(\.[0-9]+)?|\.[0-9]+)\b
-      scope: constant.numeric.ac
+    - match: \b0x\h+\b
+      scope: constant.numeric.hex.ac
+    - match: \b([0-9]+)?\.[0-9]+\b
+      scope: constant.numeric.float.ac
+    - match: \b[0-9]+\b
+      scope: constant.numeric.integer.ac
+    - match: '\.\.\.'
+      scope: variable.parameter.ac
     - match: \b\.\b
       scope: punctuation.accessor.ac
     - match: ','
