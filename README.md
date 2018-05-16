@@ -79,7 +79,7 @@ Decimal representation of a floating-point constant, e.g.:
 
 #### String
 
-A sequence of characters. A three-digit octal (\*nnn*) and two-digit hexadecimal (\x*nn*) escapes represent individual bytes. UTF-8 characters are escaped using a "\u" prefix.
+A sequence of characters. A three-digit octal (\*nnn*) and two-digit hexadecimal (\\x*nn*) escapes represent individual bytes. UTF-8 characters are escaped using a "\u" prefix.
 ```
 "abc"
 "Hello world\n"
@@ -114,8 +114,8 @@ Custom types are aliases to predefined types using the keyword **typedef**, e.g.
 typedef string MyString
 
 typedef {
-	int MyNumeric
-	bool MyBoolean
+    int MyNumeric
+    bool MyBoolean
 }
 ```
 
@@ -146,11 +146,96 @@ The zero value for **bool** is *false*.
 The **string** type represents an UTF-8 string.
 Character arrays should use the **byte** type.
 
+The zero value for a **string** is the empty string.
+
 ### Array
 
 An array is a sequence of *N* elements of a single type.
+
+The zero value for a **array** is a array filled with the zero value for it's type.
 ```
 int[99] x
 byte[5] b = "test\0"
 string[2] s = ["hello", "world!"]
-``
+```
+
+### Object
+
+An **object** is a sequence of variables and functions (fields). All types are represented internally as objects.
+
+The zero value for a **object** has every field set as it's zero value.
+```
+object {
+    int x
+    string y
+    func z()
+}
+```
+
+### Function
+
+A **function** type represents functions with the same parameters and return.
+
+The zero value for a **function** variable is **null**.
+```
+func()
+func(int x) int
+func(string a, ...) (int, float)
+```
+
+### List
+
+A **list** is a sequence of elements of arbitrary types.
+
+The zero value for a **list** variable is the a empty **list**.
+```
+list x
+list y = [99, "hello", true]
+```
+
+### Dict
+
+A **dict** is a group of elements of arbitrary types, each associated with a single key of a specified type.
+
+The zero value for a **dict** variable is the a empty **dict**.
+```
+dict[string] x
+dict[int] z = {1: 99, 2: "hello", 400: true}
+```
+
+### Set
+
+A **set** represent a list of unique values.
+
+The zero value for a **set** variable is the a empty **set**.
+```
+set x
+set y = [1,2,3,4,3,2,1]
+```
+
+### Pointer
+
+A **pointer** type is a reference to another type.
+
+The zero value for a **pointer** variable is **null**.
+```
+object *
+int *
+set *
+```
+
+## Declarations and Scope
+
+### Constant declarations
+
+A constant declaration bind a identifier list to a constant expression list.
+
+```
+const int MyConst1 = 99
+const string MyConst2 = "Hello"
+const {
+    float MyConst3 = 2.0
+    bool MyConst4 = false
+}
+const float x, string y, bool z = 3.14, "hello 123", true
+```
