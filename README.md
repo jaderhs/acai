@@ -295,6 +295,12 @@ func myfunc3(int x, y, z, string a, b) { /* 'x','y' and 'z' are int. 'a' and 'b'
 func myfunc4(int x, ...) { /* '...' is a list of arguments */
     list myargs = ...
 }
+
+func myfunc5() {
+    func subfunc1() {    /* Available inside myfunc5 as subfunc1 and outside as myfunc5.subfunc1() */
+       print("hello from subfunc")
+    }
+}
 ```
 
 ### Method declarations
@@ -302,14 +308,14 @@ func myfunc4(int x, ...) { /* '...' is a list of arguments */
 ```
 object x {
 
-	func method1(int y) int {
-		return y + 42
-	}
+    func method1(int y) int {
+        return y + 42
+    }
 }
 
 func x.method2(float x) int {
 
-	return x + 99
+    return x + 99
 }
 ```
 
@@ -377,3 +383,56 @@ if $x := f(); int $y = 42; x > y {
 print("x value is ", x, " and y value is ", y) /* 'x' and 'y' are available here */
 ```
 
+### Swith statements
+```
+switch x {
+    case "hello":
+        print("world")
+        next /* fallthrough the next case */
+    case "goodbye":
+        print("my friend")
+    case "ok":
+        print("it sure is")
+}
+```
+
+### Defer
+
+A **defer** is a block that's executed when an function scope ends.
+
+Multiple **defer** blocks are executed in reverse order from declaration.
+
+```
+func myfunc(int x) int {
+
+    object mylock
+    lock(mylock)
+
+    defer {
+        unlock(mylock)
+        print("Lock is now unlocked")
+    }
+
+    defer mydefer {
+        print("A defer may have an identifier")
+    }
+
+    defer {
+        string hello = "ok"
+        print("This block will run before the previous block")
+    }
+
+    defer: print("For single expressions, you can use a colon")
+
+    undefer /* Remove the last defer */
+    undefer mydefer /* Remove a defer by identifier */
+    undefer /* Remove the defer with the 'string hello' variable */
+
+    if(x > 42)
+        return 42 /* defer blocks will run here */
+
+    do_something()
+
+    return 99 /* defer blocks will run here */
+}
+```
