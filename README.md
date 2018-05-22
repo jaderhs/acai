@@ -163,6 +163,19 @@ object {
 }
 ```
 
+#### Virtual Objects
+
+A **virtual object** is a template of an object.
+
+Any object that **implements** a virtual object **must** have the same non initialized methods and variables as the **virtual object**.
+```
+virtual object {
+    int x
+    func y() {return 99} /* y() has a default implementation */
+    func z()
+}
+```
+
 ### Function
 
 A **function** type represents functions with the same parameters and return.
@@ -204,11 +217,11 @@ set x
 set y = [1, 2, 3, 4, 3, 2, 1]
 ```
 
-### Pointer
+### Reference
 
-A **pointer** type is a reference to another type.
+A **reference** type is a reference to another type.
 
-The zero value for a **pointer** variable is **null**.
+The zero value for a **reference** variable is **null**.
 ```
 object *
 int *
@@ -263,7 +276,7 @@ string hello = "world"
 
 #### Variable type inference
 
-Initialized variables may be declared without a type using the type inference assignment operator (:=), e.g.:
+Initialized variables may be declared without a type using the type inference assignment operator (*:=*), e.g.:
 ```
 u := 99        /* same as int x = 99 */
 v := uint(55)  /* same as uint x = 55 */
@@ -305,17 +318,21 @@ func myfunc5() {
 
 ### Method declarations
 
+**Methods** may be declared within an **object** declaration block or outside using the *object_name.method* notation, e.g.:
+
 ```
 object x {
 
     func method1(int y) int {
         return y + 42
     }
+
+    func method2
 }
 
-func x.method2(float x) int {
+func x.method2(float y) int {
 
-    return x + 99
+    return y + 99
 }
 ```
 
@@ -396,6 +413,74 @@ switch x {
 }
 ```
 
+### Loops
+Loops are created using a **for**, **do/while** or **while** statement.
+
+A **for** loop has two forms.
+
+#### Iteration statement for
+
+Allows iteration of a object implementing the **iterable** **virtual object**. Both the **list** and **dict** types implement this template.
+```
+for item in mylist {
+   print("Item from list is ", item)
+}
+
+for index, item in mylist {
+    print("Item ", index, " from list is ", item)
+}
+
+for key, value in mydict {
+    print("dict[", key, "]=", value)
+}
+```
+#### Triple statement for
+
+This statement takes at three statements after the **for** keyword.
+
+The first statement is the *initialization statement*.
+
+The middle statement is the *evaluation condition*. The loop will be executed while this condition is **true**.
+
+The rightmost statement is the *post condition evaluation statement*.
+
+Both the *initialization statement* and the *post condition evaluation statement* can be extended using a *statement list* inside a block.
+
+```
+for int i = 0; i < 10; i++ {
+    print("The value of 'i' is ", i)
+}
+
+for {int i = 0; int j = 0; int k = 0} ; /* Multi statement initialization */
+    i < 30 ;
+    {i++; j++; k++} { /* Multi post condition statement */
+
+        print("The sum of values is ", i + j + k)
+    }
+```
+
+#### while
+
+Execute the loop block until the **while** condition is **false**.
+```
+int i = 0
+while i < 10 {
+    print("The value of 'i' is ", i++)
+}
+```
+
+#### do/while
+
+Execute the loop block until the **while** condition is **false**.
+
+```
+float f = 0.0
+do {
+    f += 0.1
+    print("The value of 'f' is ", f)
+} while f < 1.0
+```
+
 ### Defer
 
 A **defer** is a block that's executed when an function scope ends.
@@ -422,7 +507,7 @@ func myfunc(int x) int {
         print("This block will run before the previous block")
     }
 
-    defer: print("For single expressions, you can use a colon")
+    defer: print("For single expressions, you may use a colon")
 
     undefer /* Remove the last defer */
     undefer mydefer /* Remove a defer by identifier */
